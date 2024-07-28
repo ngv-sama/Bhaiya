@@ -1,0 +1,231 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    height: 100%;
+    color: #333;
+}
+
+.full-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #000;
+    position: relative;
+}
+
+.logo-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .logo-text {
+    font-size: 64px;
+    font-weight: bold;
+    color: #fff;
+    z-index: 10;
+  }
+  
+  .arrow {
+    position: absolute;
+    bottom: 20px;
+    font-size: 24px;
+    color: #fff;
+    animation: blink 1.5s infinite;
+  }
+  
+  
+.sub-text {
+    font-size: 18px;
+    /* font-weight: bold; */
+    color: #fff;
+}
+.arrow {
+    margin-top: 20px;
+    font-size: 24px;
+    animation: blink 2.5s infinite;
+    color: #fff;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.content-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #fff;
+    padding: 20px;
+}
+
+.login-container, .login-box {
+    width: 45%;
+    max-width: 400px;
+    padding: 20px;
+    background-color: #fff;
+    margin: 0 20px;
+}
+
+.toggle {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.toggle-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #888;
+    padding: 10px;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+}
+
+.toggle-button.active, .toggle-button:hover {
+    color: #000;
+    border-bottom: 2px solid #000;
+}
+
+.login-form {
+    width: 100%;
+}
+
+.input-group {
+    position: relative;
+    margin: 10px 0;
+}
+
+.input-bubble {
+    width: calc(100% - 40px);
+    padding: 15px;
+    font-size: 16px;
+    border: 1px solid transparent;
+    outline: none;
+    background-color: transparent;
+    transition: border-color 0.3s ease, background-color 0.3s ease, width 0.3s ease, padding 0.3s ease;
+    color: #000;
+    border-radius: 20px;
+    margin-right: 20px;
+}
+
+.input-bubble:focus, .input-bubble:hover {
+    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+    border-radius: 5px;
+    width: calc(100% - 30px);
+    padding: 18px;
+}
+
+.check-mark {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    color: #000;
+}
+
+.input-group.filled .check-mark {
+    display: block;
+}
+
+.login-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    color: white;
+    background-color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 20px 0;
+}
+
+.login-button:hover {
+    background-color: #555;
+}
+
+.social-button {
+    background-color: #333;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    vertical-align: middle;
+    width: 100%;
+    border-radius: 8px;
+    margin: 10px auto;
+    outline: none;
+    padding: 0;
+    transition: all 0.3s ease;
+    border: 1px solid #000;
+}
+
+.social-button span {
+    display: none;
+    color: #000;
+    transition: all 0.3s ease;
+}
+
+.social-button:hover {
+    background-image: none !important;
+    background-color: #fff;
+}
+
+.social-button:hover span {
+    display: inline;
+}
+
+#facebook-connect {
+    background-image: url('https://raw.githubusercontent.com/eswarasai/social-login/master/img/facebook-white.svg?sanitize=true');
+    background-size: 30px 30px;
+}
+
+#google-connect {
+    background-image: url('https://raw.githubusercontent.com/eswarasai/social-login/master/img/google-plus-white.png');
+    background-size: 35px 35px;
+}
+
+#twitter-connect {
+    background-image: url('https://raw.githubusercontent.com/eswarasai/social-login/master/img/twitter-white.png');
+    background-size: 35px 35px;
+}
+
+#linkedin-connect {
+    background-image: url('https://raw.githubusercontent.com/eswarasai/social-login/master/img/linkedin-white.svg?sanitize=true');
+    background-size: 25px 25px;
+}
+
+@media (max-width: 768px) {
+    .content-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .login-container, .login-box {
+        width: 100%;
+        margin: 0 0 20px 0;
+    }
+}
