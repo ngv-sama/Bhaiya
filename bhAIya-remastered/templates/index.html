@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bhAIya: Find your product today</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>bhAIya: Find your product today</h1>
+    </header>
+    <main>
+        <h2>Hello there! What are you looking for today?</h2>
+        <form id="recommendation-form" enctype="multipart/form-data">
+            <textarea id="description" name="description" placeholder="Enter your description here"></textarea>
+            <input type="file" id="image-upload" name="image" accept="image/*">
+            <button type="submit">Get Recommendations</button>
+        </form>
+        <div id="recommendations"></div>
+    </main>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
