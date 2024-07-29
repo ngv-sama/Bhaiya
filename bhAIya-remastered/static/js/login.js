@@ -1,9 +1,20 @@
+import { handleGoogleSignIn } from './firebase-auth.js';
+
 document.addEventListener('DOMContentLoaded', function() {
+    
     const userToggleButton = document.querySelectorAll('.toggle-button')[0];
     const adminToggleButton = document.querySelectorAll('.toggle-button')[1];
     const loginForm = document.querySelector('.login-form');
     const inputGroups = document.querySelectorAll('.input-group');
     const userTypeInput = document.querySelector('input[name="user_type"]');
+
+    const googleLoginButton = document.getElementById('google-connect');
+    if (googleLoginButton) {
+        googleLoginButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleGoogleSignIn();
+        });
+    }
 
     userToggleButton.addEventListener('click', function() {
         setActiveToggle(userToggleButton, adminToggleButton, 'user');
