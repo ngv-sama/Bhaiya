@@ -5,8 +5,12 @@ from langchain.prompts import PromptTemplate
 import json
 from base64 import b64encode
 import sys
+from dotenv import load_dotenv
 
-BASEURL="http://localhost:11434"
+load_dotenv()
+
+BASEURL=os.getenv("BASEURL")
+HUGGINGFACETOKEN = os.getenv("HUGGINGFACETOKEN")
 
 def encodedimage(imgPath):
     try:

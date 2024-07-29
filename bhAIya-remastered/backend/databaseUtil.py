@@ -123,6 +123,8 @@ if __name__=="__main__":
     # idc=ImageDatabaseCreator("images")
     # print(idc.create_database())
 
-    dc = DatabaseCreator(data, idColumn, columnsToAccept, priceColumn,"ImagesBackend")
+    dc = DatabaseCreator(
+        data, idColumn, columnsToAccept, priceColumn, os.getenv("IMAGES_PATH")
+    )
     dc.create_database()
     dc.createJSONDatabase()

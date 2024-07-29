@@ -48,23 +48,23 @@ def find_top_k_similar(match_data, data_list, top_k=3):
     return similarities[:top_k]
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # Sample data
-    data_list = [
-        {"id":452,"Main category": ["banana", "cherry", "date"], "Sub categories": ["elephant", "frog", "goat"],"Additional details": ["Summer", "red", "fruit", "Party"] },
-        {"id":532,"Main category": ["sports", "clothes", "football"], "Sub categories": ["blue", "shirt", "large"],"Additional details": ["Summer 2012.0", "Blue", "Casual", "Party"]},
-        {"id":876,"Main category": ["blue", "shirt", "large"], "Sub categories":["Summer 2012.0", "Blue", "Casual", "Party"],"Additional details": ["sports", "clothes", "football"] },
-        {"id":457,"Main category": ["cherry", "date", "fig"], "Sub categories": ["frog", "goat", "horse"],"Additional details": ["winter", "brown"]},
-        {"id":435,"Main category": ["apple", "blueberry", "cherry"], "Sub categories": ["ant", "bat", "cat"],"Additional details": ["Summer", "cherry", "fruit", "home"]},
-    ]
+#     # Sample data
+#     data_list = [
+#         {"id":452,"Main category": ["banana", "cherry", "date"], "Sub categories": ["elephant", "frog", "goat"],"Additional details": ["Summer", "red", "fruit", "Party"] },
+#         {"id":532,"Main category": ["sports", "clothes", "football"], "Sub categories": ["blue", "shirt", "large"],"Additional details": ["Summer 2012.0", "Blue", "Casual", "Party"]},
+#         {"id":876,"Main category": ["blue", "shirt", "large"], "Sub categories":["Summer 2012.0", "Blue", "Casual", "Party"],"Additional details": ["sports", "clothes", "football"] },
+#         {"id":457,"Main category": ["cherry", "date", "fig"], "Sub categories": ["frog", "goat", "horse"],"Additional details": ["winter", "brown"]},
+#         {"id":435,"Main category": ["apple", "blueberry", "cherry"], "Sub categories": ["ant", "bat", "cat"],"Additional details": ["Summer", "cherry", "fruit", "home"]},
+#     ]
 
 
-    # match_data = {"Main category": ["apple", "banana", "cherry"], "Sub categories": ["dog", "elephant", "frog"]}
-    match_data = {"Main category": ["clothes", "t-shirt"], "Sub categories": ["deep blue", "big"], "Additional details": ["sports","cricket"]}
+#     # match_data = {"Main category": ["apple", "banana", "cherry"], "Sub categories": ["dog", "elephant", "frog"]}
+#     match_data = {"Main category": ["clothes", "t-shirt"], "Sub categories": ["deep blue", "big"], "Additional details": ["sports","cricket"]}
 
-    # Prepare sentences for training the Word2Vec model
+#     # Prepare sentences for training the Word2Vec model
 
-    # Find top 3 similar items
-    top_k_similar = find_top_k_similar(match_data, data_list, top_k=1)
-    print("\n\n",top_k_similar)
+#     # Find top 3 similar items
+#     top_k_similar = find_top_k_similar(match_data, data_list, top_k=1)
+#     print("\n\n",top_k_similar)

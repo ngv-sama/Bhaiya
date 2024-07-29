@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-database_path = os.getenv("DATABASE_PATH")
-images_path = os.getenv("IMAGES_PATH")
+database_path = os.getenv("SAMPLE_DATABASE_NORMAL")
+images_path = os.getenv("SAMPLE_DATABASE_IMAGE")
 
 app=FastAPI()
 @app.get("/")

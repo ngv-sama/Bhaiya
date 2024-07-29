@@ -4,11 +4,12 @@ import base64
 from PIL import Image
 import io
 import traceback
+import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-BACKEND_URL = "http://127.0.0.1:8000"  # Updated to match your FastAPI port
+BACKEND_URL = os.getenv("BACKEND_URL_SERVER")  # Updated to match your FastAPI port
 
 @app.route('/')
 def login():
