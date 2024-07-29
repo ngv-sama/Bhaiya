@@ -43,3 +43,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+const scrollingContainer = document.querySelector('.scrolling-text-container');
+const scrollSpeed = 2; // Adjusted scroll speed
+const interval = 40; // Interval in milliseconds
+
+function autoScroll() {
+  scrollingContainer.scrollTop += scrollSpeed;
+  console.log('Scroll Top:', scrollingContainer.scrollTop);
+
+  // Add a small buffer to account for rounding issues
+  if (scrollingContainer.scrollTop + scrollingContainer.clientHeight >= scrollingContainer.scrollHeight - 1) {
+    console.log('Reached bottom, resetting...');
+    scrollingContainer.scrollTop = 0;
+  }
+}
+
+setInterval(autoScroll, interval);
+
+
+
+

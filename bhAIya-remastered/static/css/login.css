@@ -34,6 +34,13 @@ body, html {
     font-weight: bold;
     color: #fff;
     z-index: 10;
+    margin: 10px;
+  }
+
+  .logo-text-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   .arrow {
@@ -61,6 +68,34 @@ body, html {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
+
+
+.login-text-top-left {
+    position: absolute;
+    font-size: 1rem; /* Adjust size as needed */
+    color: black; /* Adjust color as needed */
+    font-weight: bold;
+    z-index: 1000; /* Ensure it is on top of other elements */
+}
+
+.logo-text-top-left{
+    position: absolute;
+    top: 50px; /* Adjust as needed */
+    left: 50px; /* Adjust as needed */
+    font-size: 1.5rem; /* Adjust size as needed */
+    color: white; /* Adjust color as needed */
+    font-weight: bold;
+    z-index: 1000; /* Ensure it is on top of other elements */
+}
+
+.logo-container {
+    position: relative; /* Ensure the absolute positioning works within this container */
+}
+
+.login-container {
+    position: relative; /* Ensure the absolute positioning works within this container */
+}
+
 
 .content-container {
     display: flex;
@@ -228,4 +263,39 @@ body, html {
         width: 100%;
         margin: 0 0 20px 0;
     }
+}
+
+.scrolling-text-container {
+    height: 100px/* height of a single .scrolling-text element */;
+    overflow-y: scroll; /* Prevent scrolling */
+  }
+  
+  .scrolling-text {
+    /* Style for each translation */
+    font-size: 64px;
+    font-weight: bold;
+    color: #fff;
+    z-index: 10;
+    margin: 10px;
+  }
+
+  .scrolling-text-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  ::-webkit-scrollbar {
+    display: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scroll thumb */
+    border-radius: 10px; /* Rounded corners for the scroll thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Color of the scroll thumb on hover */
+}
+
+::-webkit-scrollbar-track {
+    display: none;
 }

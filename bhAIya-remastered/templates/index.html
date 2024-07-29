@@ -3,22 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bhAIya: Find your product today</title>
+    <title>bhAIya: Your AI Shopping Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <header>
-        <h1>bhAIya: Find your product today</h1>
-    </header>
-    <main>
-        <h2>Hello there! What are you looking for today?</h2>
-        <form id="recommendation-form" enctype="multipart/form-data">
-            <textarea id="description" name="description" placeholder="Enter your description here"></textarea>
-            <input type="file" id="image-upload" name="image" accept="image/*">
-            <button type="submit">Get Recommendations</button>
+    <div class="chat-container">
+        <header>
+            <a href="{{ url_for('login') }}" class="back-button">&#8592;</a>
+            <h1>bhAIya</h1>
+        </header>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message received">
+                <p>Hello! I'm bhAIya, your AI shopping assistant. How can I help you today?</p>
+            </div>
+        </div>
+        <form id="chat-form" enctype="multipart/form-data">
+            <div class="input-container">
+                <div class="image-preview-container">
+                    <input type="file" id="image-upload" name="image" accept="image/*">
+                    <label for="image-upload" class="upload-btn">📷</label>
+                    <div id="image-preview"></div>
+                </div>
+                <input type="text" id="user-input" name="description" placeholder="Type a message..." autocomplete="off">
+                <button type="submit">Send</button>
+            </div>
         </form>
-        <div id="recommendations"></div>
-    </main>
+    </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
