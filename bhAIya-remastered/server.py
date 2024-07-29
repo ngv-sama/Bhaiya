@@ -4,15 +4,42 @@ import base64
 from PIL import Image
 import io
 import traceback
+import firebase_admin
+from firebase_admin import credentials, auth
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
+firebase_config = {
+    "apiKey": "AIzaSyAUDDGcezlfJFL7YYLjfOHVA8L15LHWt1o",
+    "authDomain": "bhaiya-ee84c.firebaseapp.com",
+    "projectId": "bhaiya-ee84c",
+    "storageBucket": "bhaiya-ee84c.appspot.com",
+    "messagingSenderId": "183878456700",
+    "appId": "1:183878456700:web:64968e248795cd9afd00f9",
+    "measurementId": "G-SHD20ND580"
+}
+
+cred = credentials.Certificate("bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json")
+firebase_admin.initialize_app(cred)
 
 BACKEND_URL = "http://127.0.0.1:8000"  # Updated to match your FastAPI port
 
 @app.route('/')
 def login():
     return render_template('login.html')
+
+@app.route('/verify_token', methods=['POST'])
+def verify_token():
+    id_token = request.json['idToken']
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+        session['logged_in'] = True
+        session['user_type'] = 'user'  # Assuming all Google logins are user type
+        return jsonify({"success": True}), 200
+    except auth.InvalidIdTokenError:
+        return jsonify({"error": "Invalid token"}), 400
 
 @app.route('/login', methods=['POST'])
 def handle_login():
