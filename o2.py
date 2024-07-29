@@ -2,24 +2,58 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Dummy sidebar
-st.sidebar.title("Navigation")
-st.sidebar.markdown("### Pages")
 st.sidebar.radio("Go to", ["Sales", "Orders", "Inventory", "Customers"])
 
-# Background image
-background_image = """
+# Background image and custom styles
+custom_styles = """
 <style>
 [data-testid="stAppViewContainer"] > .main {
-    background-image: url("https://hougumlaw.com/wp-content/uploads/2016/05/light-website-backgrounds-light-color-background-images-light-color-background-images-for-website-1024x640.jpg");
-    background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
-    background-position: center;  
-    background-repeat: no-repeat;
+    background-color: #000;  /* Black background */
+    color: #fff;  /* White text */
+}
+
+
+
+
+
+h1, h2, h3, h4, h5, h6 {
+    color: #fff;  /* White headings */
+}
+
+p, label {
+    color: #333;  /* Dark Gray text */
+}
+
+input[type="text"], input[type="password"], textarea {
+    background-color: #f2f2f2;  /* Very light gray input background */
+    border: 1px solid #ccc;  /* Light Gray border */
+}
+
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+    background-color: #f2f2f2;  /* Very light gray input background on focus */
+    border-color: #555;  /* Light Blue border on focus */
+}
+
+button {
+    background-color: #333;  /* Dark Gray button background */
+    color: #fff;  /* White button text */
+}
+
+button:hover {
+    background-color: #555;  /* Light Blue button background on hover */
+}
+
+.scrollbar-thumb {
+    background-color: #888;  /* Gray scrollbar thumb */
+}
+
+.scrollbar-thumb:hover {
+    background-color: #555;  /* Light Blue scrollbar thumb on hover */
 }
 </style>
 """
 
-st.markdown(background_image, unsafe_allow_html=True)
+st.markdown(custom_styles, unsafe_allow_html=True)
 
 # Read the CSV file
 df = pd.read_csv('database.csv')
@@ -49,10 +83,6 @@ if action == 'Add Item':
                 'productDisplayName': new_productDisplayName,
                 'price': new_price
             }
-            df = df.append(new_item, ignore_index=True)
-            df.to_csv('database.csv', index=False)
-            st.success('Item added successfully!')
-
 elif action == 'Delete Item':
     if st.button('Delete Item'):
         delete_id = st.text_input('Enter ID of item to delete')
@@ -64,7 +94,7 @@ elif action == 'Delete Item':
             st.success('Item deleted successfully!')
 
 # Buyer Analytics
-st.sidebar.subheader('Buyer Analytics')
+st.sidebar.header('Buyer Analytics')
 # Generate random data for analytics
 sales_data = df.copy()
 sales_data['sales'] = np.random.randint(1, 100, size=len(df))
