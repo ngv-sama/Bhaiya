@@ -108,8 +108,9 @@ header h1 {
     
 }
 
-
-
+#user-input:focus {
+    outline: none;
+}
 
 button {
     background-color: #007aff;
