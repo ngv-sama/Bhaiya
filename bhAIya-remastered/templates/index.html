@@ -28,6 +28,18 @@
                 <button type="submit">Send</button>
             </div>
         </form>
+    <div class="side-drawer">
+        <div class="drawer-handle">
+            <div class="handle-bar"></div>
+        </div>
+        <div class="drawer-content">
+            <h2>User Profile</h2>
+            <p>Email: <span id="user-email"></span></p>
+            <p>UUID: <span id="user-uuid"></span></p>
+            <h3>Chat History</h3>
+            <ul id="chat-history-list"></ul>
+        </div>
+    </div>
     </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

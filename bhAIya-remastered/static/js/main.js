@@ -5,6 +5,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageUpload = document.getElementById('image-upload');
     const imagePreview = document.getElementById('image-preview');
 
+    const bottomDrawer = document.querySelector('.side-drawer');
+    const drawerHandle = document.querySelector('.drawer-handle');
+
+    drawerHandle.addEventListener('click', function() {
+        bottomDrawer.classList.toggle('open');
+        if (bottomDrawer.classList.contains('open')) {
+            fetchUserProfile();
+            fetchChatHistory();
+        }
+    });
+
     function addMessage(content, type, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;

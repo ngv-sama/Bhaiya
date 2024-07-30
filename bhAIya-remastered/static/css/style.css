@@ -7,6 +7,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    overflow: hidden;
 }
 
 .chat-container {
@@ -21,7 +22,7 @@ header {
     background-color: #f2f2f7;
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid #d1d1d6;
+    /* border-bottom: 1px solid #d1d1d6; */
     position: relative;
 }
 
@@ -104,7 +105,11 @@ header h1 {
     font-size: 16px;
     margin-right: 10px;
     height: 24px;
+    
 }
+
+
+
 
 button {
     background-color: #007aff;
@@ -248,4 +253,88 @@ button {
     .item {
         width: calc(25% - 7.5px);
     }
+}
+.side-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 500px;
+    background-color: #d4d4d9;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    transform: translateX(calc(100%));
+    transition: transform 0.55s ease-in-out;
+    height: 100vh;
+    z-index: 10;
+    opacity: 90%;
+}
+
+.side-drawer.open {
+    transform: translateX(0);
+}
+
+.drawer-handle {
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background-color: #d5d5d8;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.handle-bar {
+    width: 4px;
+    height: 40px;
+    background-color: #ededf3;
+    border-radius: 2px;
+}
+
+.drawer-content {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Adjust chat container to make room for the drawer handle */
+.chat-container {
+    padding-bottom: 20px;
+}
+
+/* Style the content inside the drawer */
+.drawer-content h2, .drawer-content h3 {
+    margin-top: 0;
+    color: #000;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.drawer-content p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+#chat-history-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#chat-history-list li {
+    padding: 10px;
+    border-bottom: 1px solid #e5e5ea;
+    font-size: 14px;
+    color: #333;
+}
+
+#chat-history-list li:last-child {
+    border-bottom: none;
 }
