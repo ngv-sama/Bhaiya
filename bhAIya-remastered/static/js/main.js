@@ -1,3 +1,16 @@
+window.addEventListener('beforeunload', (event) => {
+    console.log('User is leaving the page');
+    fetch('/save_chat_history',{
+        method: 'GET'
+    }).then(response => response.json()).then(data=>{
+        console.log("This is the data received",data);
+        console.log("Chat history saved");
+    }).catch(error => {
+        console.error('Error:', error);
+    })
+});
+  
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('chat-form');
     const chatMessages = document.getElementById('chat-messages');
@@ -7,6 +20,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const bottomDrawer = document.querySelector('.side-drawer');
     const drawerHandle = document.querySelector('.drawer-handle');
+
+    const username = document.getElementById('username');
+    const email = document.getElementById('user-email');
+
+    function fetchUserProfile() {
+        fetch('/get_profile')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Received data:", data);
+            username.textContent = data.username;
+            email.textContent = data.email;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    
+    }
 
     drawerHandle.addEventListener('click', function() {
         bottomDrawer.classList.toggle('open');

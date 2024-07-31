@@ -339,3 +339,7 @@ button {
 #chat-history-list li:last-child {
     border-bottom: none;
 }
+
+::-webkit-scrollbar {
+    display: none;
+}

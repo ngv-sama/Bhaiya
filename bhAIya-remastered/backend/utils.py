@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASEURL=os.getenv("BASEURL")
+# BASEURL = 'http://localhost:11434'
 HUGGINGFACETOKEN = os.getenv("HUGGINGFACETOKEN")
 
 def encodedimage(imgPath):

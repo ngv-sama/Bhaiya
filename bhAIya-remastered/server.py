@@ -11,6 +11,7 @@ import uuid
 import hashlib
 import json
 from datetime import datetime
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
@@ -36,6 +37,7 @@ def verify_token():
         session['user_type'] = 'user'
         session['email'] = email
         session['uuid'] = hashlib.sha256(email.encode()).hexdigest()
+        session['username'] = email.split('@')[0]
         session['chat_history'] = []
         return jsonify({"success": True}), 200
     except auth.InvalidIdTokenError:
@@ -44,21 +46,35 @@ def verify_token():
 @app.route('/login', methods=['POST'])
 def handle_login():
     username = request.form.get('username')
+    email = request.form.get('email')
     password = request.form.get('password')
     user_type = request.form.get('user_type')
     
     if username and password:  # Add your authentication logic here
         session['logged_in'] = True
         session['user_type'] = user_type
-        session['email'] = username
+        session['email'] = email
+        session['username'] = username
         session['uuid'] = hashlib.sha256(username.encode()).hexdigest()
         session['chat_history'] = []
+        logging.info(f"User {username} logged in")
+        logging.info(f"Chat History Initialized  to: {session['chat_history']}")
         if user_type == 'user':
             return redirect(url_for('index'))
         else:
             return redirect(url_for('dashboard'))
     else:
         return render_template('login.html', error="Invalid credentials")
+
+@app.route('/get_profile', methods=['GET'])
+def get_profile():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    
+    return jsonify({
+        "username": session['username'],
+        "email": session['email']
+    })
 
 @app.route('/logout')
 def logout():
@@ -91,6 +107,8 @@ def get_recommendations():
     if desc:
         data['text'] = desc
 
+    print("Sending to FastAPI:", data)
+
     if image and image.filename:
         try:
             img = Image.open(image)
@@ -109,7 +127,7 @@ def get_recommendations():
             result = response.json()
             # Save the user's question and the assistant's response
             session['chat_history'].append({
-                'user': desc,
+                'user': data,
                 'assistant': result
             })
             return jsonify(result)
@@ -135,7 +153,7 @@ def item_page(item_id):
     }
     return render_template('item.html', item=item_details)
 
-@app.route('/save_chat_history', methods=['POST'])
+@app.route('/save_chat_history', methods=['GET'])
 def save_chat_history():
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
@@ -150,6 +168,8 @@ def save_chat_history():
         "chat_date": datetime.now().isoformat(),
         "chat_history": chat_history
     }
+
+    logging.info("Sending Data to Backend...", flush=True)
 
     try:
         response = requests.post(f"{BACKEND_URL}/chat_history", json=data)

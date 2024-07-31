@@ -52,6 +52,7 @@ async def data(data:dict):
     text=data.get("text",None)
     img64=data.get("img64",None)
     categories={}
+    print(text)
     if(text!=None):
         textCategories=getCategoriesFromText("mistral",text,ollama=True)["categories"][0]
     if(img64!=None):
