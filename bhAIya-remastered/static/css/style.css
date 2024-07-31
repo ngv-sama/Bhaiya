@@ -430,3 +430,33 @@ button {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Add these styles to your existing CSS file */
+
+.product-chat-container {
+    display: flex;
+    height: calc(100vh - 120px); /* Adjust based on your header and form height */
+    overflow: hidden;
+}
+
+.product-details {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid #d1d1d6;
+}
+
+
+.back-button {
+    font-size: 24px;
+    text-decoration: none;
+    color: #007aff;
+}
+
+
+.product-details img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}

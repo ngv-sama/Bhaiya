@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - bhAIya</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <header>
+            <a href="{{ url_for('index') }}" class="ios-button back-button" style="text-decoration: none;">Back</a>
+            <h1>Product Details</h1>
+        </header>
+        <div class="product-chat-container">
+            <div class="product-details" id="product-details">
+                <!-- Product details will be loaded here -->
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Chat messages will be loaded here -->
+            </div>
+        </div>
+        <form id="chat-form">
+            <div class="input-container">
+                <input type="text" id="user-input" name="message" placeholder="Ask about this product..." autocomplete="off">
+                <button type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='js/product.js') }}"></script>
+</body>
+</html>

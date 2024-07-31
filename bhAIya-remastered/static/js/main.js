@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <img src="data:image/jpeg;base64,${base64Image}" alt="${item.id}">
                                 <p>Price: ${item.price}</p>
                                 <p>ID: ${item.id}</p>
-                                <a href="/item/${item.id}">View</a>
+                                <a href="/item/${item.id}" class="view-product" data-id="${item.id}" data-image="${base64Image}" data-price="${item.price}">View</a>
                             </div>
                         `;
                     });
@@ -225,6 +225,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    function viewProduct(event) {
+        if (event.target.classList.contains('view-product')) {
+            event.preventDefault();
+            const id = event.target.getAttribute('data-id');
+            const image = event.target.getAttribute('data-image');
+            const price = event.target.getAttribute('data-price');
+    
+            // Store the image and price in sessionStorage
+            sessionStorage.setItem(`product_${id}_image`, image);
+            sessionStorage.setItem(`product_${id}_price`, price);
+    
+            // Navigate to the product page
+            window.location.href = `/item/${id}`;
+        }
+    }
+
+    document.addEventListener('click', viewProduct);
 
     newChatButton.addEventListener('click', function() {
         saveChatToServer();

@@ -130,17 +130,23 @@ def get_recommendations():
         print(traceback.format_exc())
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
+# @app.route('/item/<int:item_id>')
+# def item_page(item_id):
+#     if not session.get('logged_in'):
+#         return redirect(url_for('login'))
+    
+#     item_details = {
+#         "id": item_id,
+#         "price": "N/A",
+#         "image": "placeholder_image_data"
+#     }
+#     return render_template('item.html', item=item_details)
+
 @app.route('/item/<int:item_id>')
 def item_page(item_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    
-    item_details = {
-        "id": item_id,
-        "price": "N/A",
-        "image": "placeholder_image_data"
-    }
-    return render_template('item.html', item=item_details)
+    return render_template('item.html', item_id=item_id)
 
 @app.route('/save_chat_history', methods=['POST'])
 def save_chat_history():
@@ -179,6 +185,29 @@ def get_chat_history():
         return jsonify(user_history), 200
     else:
         return jsonify({"conversations": {}, "currentConversationId": None}), 200
+    
+
+@app.route('/get_details', methods=['POST'])
+def get_details():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    
+    product_id = request.json.get('id')
+    # Here you would typically fetch the product details from your database
+    # For now, we'll return an empty object to trigger the lorem ipsum text
+    return jsonify({})
+
+@app.route('/product_chat', methods=['POST'])
+def product_chat():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    
+    product_id = request.json.get('id')
+    message = request.json.get('message')
+    # Here you would typically process the message and generate a response
+    # For now, we'll return a simple acknowledgment
+    response = f"I understand you're asking about product {product_id}. Your message was: {message}"
+    return jsonify({"response": response})
 
 if __name__ == '__main__':
     app.run(debug=True)
