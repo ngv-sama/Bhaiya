@@ -176,7 +176,28 @@ async def addMany(data:dict):
 async def getCategories(data:dict):
     id=data["id"]
     data=mongoDatabase["database"].find({"id":id},{"_id":0})
-    return list(data)
+    imageData=getImage(imgDatabase,id)
+    data_send=list(data)[0]
+    data_send["image"]=imageData
+    return data_send
+
+@app.post("/addHistory")
+async def addHistory(data:dict):
+    incoming_data=data
+    id=incoming_data["currentConversationId"]
+    current_data = mongoDatabase["history"].find(
+        {"currentConversationId": id}, {"_id": 0}
+    )
+    if(current_data):
+        current_data["last_updated"]=incoming_data["last_updated"]
+        for convId in incoming_data["conversations"]:
+            if convId not in current_data["conversations"]:
+                current_data["conversations"]["convId"]=incoming_data["conversations"]["convId"]
+        print(current_data)
+    else:
+        x=mongoDatabase["history"].insert_one(data)
+        print(x)
+
 
 if __name__=="__main__":
     uvicorn.run(app,host="0.0.0.0",port=5004)
