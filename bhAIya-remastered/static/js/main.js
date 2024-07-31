@@ -18,6 +18,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageUpload = document.getElementById('image-upload');
     const imagePreview = document.getElementById('image-preview');
 
+
+    const username = document.getElementById('username');
+    const email = document.getElementById('user-email');
+
+    function fetchUserProfile() {
+        fetch('/get_profile')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Received data:", data);
+            username.textContent = data.username;
+            email.textContent = data.email;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    
+    }
+
     const sideDrawer = document.getElementById('sideDrawer');
     const drawerHandle = document.getElementById('drawerHandle');
     let isDragging = false;
@@ -27,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const longPressDuration = 300; // milliseconds
     
     // Initialize the drawer on the right side
-    sideDrawer.classList.add('right');
+    sideDrawer.classList.add('left');
     
     function openDrawer() {
         sideDrawer.classList.add('open');
@@ -55,6 +73,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchend', endDrag);
+    
+    // Toggle drawer when clicking the handle
+    drawerHandle.addEventListener('click', () => {
+        toggleDrawer();
+    });
     
     function startLongPress(e) {
         e.preventDefault(); // Prevent default behavior
@@ -96,13 +119,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isDragging) {
             isDragging = false;
             sideDrawer.classList.remove('dragging');
-        } else if (isHandleActive) {
-            toggleDrawer();
         }
     
         // Reset the handle active state
         isHandleActive = false;
     }
+    
     
     
 

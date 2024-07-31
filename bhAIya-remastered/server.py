@@ -168,6 +168,11 @@ def save_chat_history():
         "chat_date": datetime.now().isoformat(),
         "chat_history": chat_history
     }
+    
+    file_path ='chat_history.json'
+
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4) 
 
     logging.info("Sending Data to Backend...", flush=True)
 
