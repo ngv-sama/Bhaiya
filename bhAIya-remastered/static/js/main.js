@@ -15,21 +15,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const newChatButton = document.getElementById('new-chat-button');
     const chatHistoryList = document.getElementById('chat-history-list');
 
-    let conversations = JSON.parse(localStorage.getItem('conversations')) || {};
-    let currentConversationId = localStorage.getItem('currentConversationId');
+    let conversations = {};
+    let currentConversationId = null;
+
+    function loadConversationsFromServer() {
+        fetch('/get_chat_history')
+            .then(response => response.json())
+            .then(data => {
+                conversations = data.conversations || {};
+                currentConversationId = data.currentConversationId;
+                updateConversationsList();
+                loadCurrentConversation();
+            })
+            .catch(error => console.error('Error loading chat history:', error));
+    }
 
     function createNewConversation() {
         const conversationId = Date.now().toString();
         conversations[conversationId] = [];
-        saveToLocalStorage();
+        saveChatToServer();
         return conversationId;
     }
 
     function switchConversation(conversationId) {
-        saveToLocalStorage();
         saveChatToServer();
         currentConversationId = conversationId;
-        localStorage.setItem('currentConversationId', currentConversationId);
         loadCurrentConversation();
     }
 
@@ -71,11 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function saveToLocalStorage() {
-        localStorage.setItem('conversations', JSON.stringify(conversations));
-        localStorage.setItem('currentConversationId', currentConversationId);
-    }
-
     function saveChatToServer() {
         const data = {
             conversations: conversations,
@@ -113,8 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessage(content, type, imageUrl = null) {
         addMessageToDOM(content, type, imageUrl);
         if (currentConversationId) {
-            conversations[currentConversationId].push({ content, type, imageUrl, timestamp: Date.now });
-            saveToLocalStorage();
+            conversations[currentConversationId].push({ content, type, imageUrl, timestamp: Date.now() });
+            saveChatToServer();
         }
     }
 
@@ -312,10 +317,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize
-    if (!currentConversationId) {
-        currentConversationId = createNewConversation();
-    }
-    loadCurrentConversation();
-    updateConversationsList();
+    loadConversationsFromServer();
     fetchUserProfile();
 });

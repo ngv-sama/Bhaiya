@@ -21,21 +21,6 @@ BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
 cred = credentials.Certificate("bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json")
 firebase_admin.initialize_app(cred)
 
-# File to store chat history
-CHAT_HISTORY_FILE = 'chat_history.json'
-
-def load_chat_history():
-    if os.path.exists(CHAT_HISTORY_FILE):
-        with open(CHAT_HISTORY_FILE, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_chat_history(chat_history):
-    with open(CHAT_HISTORY_FILE, 'w') as f:
-        json.dump(chat_history, f)
-
-chat_history = load_chat_history()
-
 @app.route('/')
 def login():
     return render_template('login.html')
@@ -165,14 +150,18 @@ def save_chat_history():
     user_uuid = session['uuid']
     data = request.json
 
-    chat_history[user_uuid] = {
+    # Create a unique file for each user
+    user_file = f'chat_history_{user_uuid}.json'
+
+    user_data = {
         "email": session['email'],
         "last_updated": datetime.now().isoformat(),
         "conversations": data['conversations'],
         "currentConversationId": data['currentConversationId']
     }
     
-    save_chat_history(chat_history)
+    with open(user_file, 'w') as f:
+        json.dump(user_data, f)
     
     return jsonify({"message": "Chat history saved successfully"}), 200
 
@@ -182,9 +171,11 @@ def get_chat_history():
         return jsonify({"error": "Not logged in"}), 401
 
     user_uuid = session['uuid']
-    user_history = chat_history.get(user_uuid, {})
+    user_file = f'chat_history_{user_uuid}.json'
 
-    if user_history:
+    if os.path.exists(user_file):
+        with open(user_file, 'r') as f:
+            user_history = json.load(f)
         return jsonify(user_history), 200
     else:
         return jsonify({"conversations": {}, "currentConversationId": None}), 200
