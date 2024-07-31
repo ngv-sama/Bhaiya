@@ -110,10 +110,11 @@ async def addOne(data:dict):
 
 
 @app.post("/removeOne")
-async def removeOne(id:int):
+async def removeOne(data:dict):
     '''
     Payload : 0(any integer, id to be removed)
     '''
+    id=data["id"]
     print("deleting from database")
     try:
         x = mongoDatabase["database"].delete_one({"id": id})
@@ -171,6 +172,11 @@ async def addMany(data:dict):
         except Exception as e:
             print("Error inserting many into image database")
 
+@app.post("/getCategories")
+async def getCategories(data:dict):
+    id=data["id"]
+    data=mongoDatabase["database"].find({"id":id},{"_id":0})
+    return list(data)
 
 if __name__=="__main__":
     uvicorn.run(app,host="0.0.0.0",port=5004)
