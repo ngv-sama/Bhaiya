@@ -18,33 +18,93 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageUpload = document.getElementById('image-upload');
     const imagePreview = document.getElementById('image-preview');
 
-    const bottomDrawer = document.querySelector('.side-drawer');
-    const drawerHandle = document.querySelector('.drawer-handle');
-
-    const username = document.getElementById('username');
-    const email = document.getElementById('user-email');
-
-    function fetchUserProfile() {
-        fetch('/get_profile')
-        .then(response => response.json())
-        .then(data => {
-            console.log("Received data:", data);
-            username.textContent = data.username;
-            email.textContent = data.email;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    const sideDrawer = document.getElementById('sideDrawer');
+    const drawerHandle = document.getElementById('drawerHandle');
+    let isDragging = false;
+    let isHandleActive = false;
+    let startX, startLeft;
+    let longPressTimer;
+    const longPressDuration = 300; // milliseconds
     
+    // Initialize the drawer on the right side
+    sideDrawer.classList.add('right');
+    
+    function openDrawer() {
+        sideDrawer.classList.add('open');
+        fetchUserProfile();
+        fetchChatHistory();
     }
-
-    drawerHandle.addEventListener('click', function() {
-        bottomDrawer.classList.toggle('open');
-        if (bottomDrawer.classList.contains('open')) {
+    
+    function closeDrawer() {
+        sideDrawer.classList.remove('open');
+    }
+    
+    function toggleDrawer() {
+        sideDrawer.classList.toggle('open');
+        if (sideDrawer.classList.contains('open')) {
             fetchUserProfile();
             fetchChatHistory();
         }
-    });
+    }
+    
+    drawerHandle.addEventListener('mousedown', startLongPress);
+    drawerHandle.addEventListener('touchstart', startLongPress);
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+    
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+    
+    function startLongPress(e) {
+        e.preventDefault(); // Prevent default behavior
+        isHandleActive = true; // Indicate that the handle was the initial target
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startLeft = sideDrawer.offsetLeft;
+    
+        longPressTimer = setTimeout(() => {
+            isDragging = true;
+            sideDrawer.classList.add('dragging');
+        }, longPressDuration);
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+    
+        const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const diffX = currentX - startX;
+        const newLeft = startLeft + diffX;
+    
+        if (newLeft > window.innerWidth / 2) {
+            sideDrawer.style.left = '';
+            sideDrawer.style.right = '0';
+            sideDrawer.classList.remove('left');
+            sideDrawer.classList.add('right');
+        } else {
+            sideDrawer.style.right = '';
+            sideDrawer.style.left = '0';
+            sideDrawer.classList.remove('right');
+            sideDrawer.classList.add('left');
+        }
+    
+        openDrawer();
+    }
+    
+    function endDrag(e) {
+        clearTimeout(longPressTimer);
+    
+        if (isDragging) {
+            isDragging = false;
+            sideDrawer.classList.remove('dragging');
+        } else if (isHandleActive) {
+            toggleDrawer();
+        }
+    
+        // Reset the handle active state
+        isHandleActive = false;
+    }
+    
+    
 
     function addMessage(content, type, imageUrl = null) {
         const messageDiv = document.createElement('div');

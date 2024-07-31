@@ -262,12 +262,22 @@ button {
     bottom: 0;
     width: 500px;
     background-color: #d4d4d9;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     transform: translateX(calc(100%));
     transition: transform 0.55s ease-in-out;
     height: 100vh;
     z-index: 10;
-    opacity: 90%;
+    opacity: 95%;
+}
+
+
+.side-drawer.right {
+    right: 0;
+    transform: translateX(100%);
+}
+
+.side-drawer.left {
+    left: 0;
+    transform: translateX(-100%);
 }
 
 .side-drawer.open {
@@ -276,19 +286,31 @@ button {
 
 .drawer-handle {
     position: absolute;
-    left: -20px;
     top: 50%;
-    transform: translateY(-50%);
     width: 20px;
     height: 60px;
     background-color: #d5d5d8;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
-    z-index: 2;
+    cursor: grab;
+    z-index: 1001;
+}
+
+.side-drawer.right .drawer-handle {
+    left: -20px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.side-drawer.left .drawer-handle {
+    right: -20px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.side-drawer.dragging {
+    transition: none;
 }
 
 .handle-bar {
