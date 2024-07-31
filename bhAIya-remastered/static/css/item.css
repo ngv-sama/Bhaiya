@@ -1,0 +1,243 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.chat-container {
+    width: 100%;
+    height: 100vh;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f2f2f7;
+    padding: 10px 20px;
+    height: 60px;
+}
+
+header h1 {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #000;
+}
+
+.back-button {
+    font-size: 28px;
+    text-decoration: none;
+    color: #007aff;
+}
+
+.ios-button {
+    background-color: transparent;
+    color: #007aff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.ios-button:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.product-chat-container {
+    display: flex;
+    height: calc(100vh - 120px);
+    overflow: hidden;
+}
+
+.product-details {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    /* border-right: 1px solid #d1d1d6; */
+    max-width: 50%;
+}
+
+.product-details img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    max-width: 50%;
+}
+
+.message {
+    max-width: 80%;
+    margin-bottom: 15px;
+    clear: both;
+}
+
+.message p {
+    margin: 0;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.received {
+    float: left;
+}
+
+.received p {
+    background-color: #e5e5ea;
+    color: #000;
+}
+
+.sent {
+    float: right;
+}
+
+.sent p {
+    background-color: #007aff;
+    color: white;
+}
+
+#chat-form {
+    padding: 20px;
+    /* border-top: 1px solid #d1d1d6; */
+    height: 60px;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #007aff;
+    border-radius: 20px;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+#user-input:focus {
+    outline: none;
+}
+
+#send-button {
+    background-color: #ffffff;
+    border: 2px solid #007aff;
+    color: #007aff;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 60px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#send-button, #loading-animation {
+    background-color: #ffffff;
+    border: 1px solid #007aff;
+    color: #007aff;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 60px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+#send-button {
+    font-weight: 500;
+}
+
+#loading-animation {
+    display: none;
+}
+
+.loading-animation div {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: fade 1.2s ease-in-out infinite alternate;
+}
+
+.loading-animation div:nth-child(1) {
+    background: linear-gradient(to bottom, #007aff, #99c2ff);
+    animation-delay: 0s;
+}
+
+.loading-animation div:nth-child(2) {
+    background: linear-gradient(to bottom, #007aff, #99c2ff);
+    animation-delay: 0.4s;
+}
+
+.loading-animation div:nth-child(3) {
+    background: linear-gradient(to bottom, #007aff, #99c2ff);
+    animation-delay: 0.8s;
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes bounce {
+    to {
+        transform: translateY(-6px);
+    }
+}
+
+@media (max-width: 768px) {
+    .product-chat-container {
+        flex-direction: column;
+    }
+
+    .product-details,
+    .chat-messages {
+        max-width: 100%;
+    }
+
+    .product-details {
+        border-right: none;
+        border-bottom: 1px solid #d1d1d6;
+    }
+}
+
+::-webkit-scrollbar {
+    display: none;
+}

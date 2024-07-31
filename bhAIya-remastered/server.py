@@ -17,9 +17,27 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
 BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
+OLLAMA_URL = os.getenv("OLLAMA_URL_SERVER")
 
 cred = credentials.Certificate("bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json")
 firebase_admin.initialize_app(cred)
+
+def ollama_request(model, prompt, image=None):
+    url = f"{OLLAMA_URL}/api/generate"
+    data = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False
+    }
+    if image:
+        data["images"] = [image]
+    
+    response = requests.post(url, json=data)
+    if response.status_code == 200:
+        return response.json()["response"]
+    else:
+        raise Exception(f"Ollama request failed: {response.text}")
+
 
 @app.route('/')
 def login():
@@ -193,9 +211,19 @@ def get_details():
         return jsonify({"error": "Not logged in"}), 401
     
     product_id = request.json.get('id')
-    # Here you would typically fetch the product details from your database
-    # For now, we'll return an empty object to trigger the lorem ipsum text
-    return jsonify({})
+    print("Product ID:", product_id)
+
+    id_data={"id":int(product_id)}
+    
+    try:
+        response = requests.post(f"{BACKEND_URL}/getCategories", json=id_data)
+        if response.ok:
+            product_details = response.json()
+            return jsonify(product_details)
+        else:
+            return jsonify({"error": f"Backend error: {response.text}"}), 500
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Error communicating with backend: {str(e)}"}), 500
 
 @app.route('/product_chat', methods=['POST'])
 def product_chat():
@@ -203,11 +231,67 @@ def product_chat():
         return jsonify({"error": "Not logged in"}), 401
     
     product_id = request.json.get('id')
-    message = request.json.get('message')
-    # Here you would typically process the message and generate a response
-    # For now, we'll return a simple acknowledgment
-    response = f"I understand you're asking about product {product_id}. Your message was: {message}"
-    return jsonify({"response": response})
+    user_message = request.json.get('message')
+    product_description = request.json.get('description', '')
+    
+    try:
+        # Fetch product details from FastAPI backend
+        response = requests.post(f"{BACKEND_URL}/getCategories", json={"id": product_id})
+        if response.ok:
+            product_details = response.json()
+            del(product_details['image'])
+            print("These are the product details: ", product_details)
+            
+            
+            # Generate a prompt for Llama 3.1
+            prompt = f"""
+            You are an AI shopping assistant. You have the following product details:
+            {product_details}
+            
+            Product description: {product_description}
+            
+            The customer asks: {user_message}
+            
+            Provide a helpful and informative response based on the product details and description.
+            """
+            
+            # Generate response using Llama 3.1
+            response = ollama_request("mistral", prompt)
+            
+            return jsonify({"response": response})
+        else:
+            return jsonify({"error": f"Backend error: {response.text}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error in product chat: {str(e)} this is payload {product_details.keys()}"}), 500
+
+@app.route('/generate_image_description', methods=['POST'])
+def generate_image_description():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Not logged in"}), 401
+    
+    product_id = request.json.get('id')
+    
+    try:
+        # Fetch product details from FastAPI backend
+        response = requests.post(f"{BACKEND_URL}/getCategories", json={"id": product_id})
+        if response.ok:
+            product_details = response.json()
+            image_data = product_details.get('image')
+            image_data=image_data[2:-1]
+            
+            if not image_data:
+                return jsonify({"error": "No image data found"}), 400
+            
+            # Generate image description using LLaVA
+            prompt = "Describe this product image in detail."
+            description = ollama_request("llava", prompt, image=image_data)
+            
+            return jsonify({"description": description})
+        else:
+            return jsonify({"error": f"Backend error: {response.text}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error generating image description: {str(e)}"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

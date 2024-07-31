@@ -51,6 +51,8 @@ async def data(data:dict):
     #     print(f"An error occured while reading the image database: {e}")
     text=data.get("text",None)
     img64=data.get("img64",None)
+    if(img64[0]=='b'):
+        img64=img64[2:-1]
     categories={}
     print(text)
     if(text!=None):
@@ -175,10 +177,11 @@ async def addMany(data:dict):
 @app.post("/getCategories")
 async def getCategories(data:dict):
     id=data["id"]
-    data=mongoDatabase["database"].find({"id":id},{"_id":0})
-    imageData=getImage(imgDatabase,id)
+    data=mongoDatabase["database"].find({"id":int(id)},{"_id":0})
+    imageData=getImage(imgDatabase,int(id))
     data_send=list(data)[0]
     data_send["image"]=imageData
+    print(data_send)
     return data_send
 
 @app.post("/addHistory")

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details - bhAIya</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/item.css') }}">
+
 </head>
 <body>
     <div class="chat-container">
@@ -23,7 +24,12 @@
         <form id="chat-form">
             <div class="input-container">
                 <input type="text" id="user-input" name="message" placeholder="Ask about this product..." autocomplete="off">
-                <button type="submit">Send</button>
+                <button type="submit" id="send-button">Send</button>
+                <div id="loading-animation" class="loading-animation">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
             </div>
         </form>
     </div>
