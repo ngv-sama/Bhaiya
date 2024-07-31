@@ -1,15 +1,8 @@
 window.addEventListener('beforeunload', (event) => {
     console.log('User is leaving the page');
-    fetch('/save_chat_history',{
-        method: 'GET'
-    }).then(response => response.json()).then(data=>{
-        console.log("This is the data received",data);
-        console.log("Chat history saved");
-    }).catch(error => {
-        console.error('Error:', error);
-    })
+    const data = JSON.stringify({"Status": "User is leaving the page"});
+    navigator.sendBeacon('/save_chat_history', data);
 });
-  
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('chat-form');
@@ -17,10 +10,89 @@ document.addEventListener('DOMContentLoaded', function() {
     const userInput = document.getElementById('user-input');
     const imageUpload = document.getElementById('image-upload');
     const imagePreview = document.getElementById('image-preview');
-
-
     const username = document.getElementById('username');
     const email = document.getElementById('user-email');
+    const newChatButton = document.getElementById('new-chat-button');
+    const chatHistoryList = document.getElementById('chat-history-list');
+
+    let conversations = JSON.parse(localStorage.getItem('conversations')) || {};
+    let currentConversationId = localStorage.getItem('currentConversationId');
+
+    function createNewConversation() {
+        const conversationId = Date.now().toString();
+        conversations[conversationId] = [];
+        saveToLocalStorage();
+        return conversationId;
+    }
+
+    function switchConversation(conversationId) {
+        saveToLocalStorage();
+        saveChatToServer();
+        currentConversationId = conversationId;
+        localStorage.setItem('currentConversationId', currentConversationId);
+        loadCurrentConversation();
+    }
+
+    function loadCurrentConversation() {
+        if (!currentConversationId || !conversations[currentConversationId]) {
+            currentConversationId = createNewConversation();
+        }
+        chatMessages.innerHTML = '';
+        conversations[currentConversationId].forEach(message => {
+            addMessageToDOM(message.content, message.type, message.imageUrl);
+        });
+    }
+
+    function updateConversationsList() {
+        chatHistoryList.innerHTML = '';
+        Object.keys(conversations).forEach((conversationId) => {
+            const conversation = conversations[conversationId];
+            if (conversation.length > 0) {
+                const firstMessage = conversation.find(msg => msg.type === 'sent');
+                if (firstMessage) {
+                    const li = document.createElement('li');
+                    li.className = 'conversation-item';
+                    const date = new Date(parseInt(conversationId));
+                    const formattedDate = date.toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric', 
+                        hour: 'numeric', 
+                        minute: 'numeric'
+                    });
+                    li.innerHTML = `
+                        <div class="conversation-date">${formattedDate}</div>
+                        <div class="conversation-preview">${firstMessage.content}</div>
+                    `;
+                    li.onclick = () => switchConversation(conversationId);
+                    chatHistoryList.appendChild(li);
+                }
+            }
+        });
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('conversations', JSON.stringify(conversations));
+        localStorage.setItem('currentConversationId', currentConversationId);
+    }
+
+    function saveChatToServer() {
+        const data = {
+            conversations: conversations,
+            currentConversationId: currentConversationId
+        };
+
+        fetch('/save_chat_history', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => console.log('Chat history saved:', data))
+        .catch(error => console.error('Error saving chat history:', error));
+    }
 
     function fetchUserProfile() {
         fetch('/get_profile')
@@ -29,106 +101,24 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Received data:", data);
             username.textContent = data.username;
             email.textContent = data.email;
+            if (conversations[currentConversationId].length === 0) {
+                addMessage(`Hello, ${username.textContent}! I am bhAIya, your friendly neighbourhood shopkeeper. How can I help you today?`, 'received');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
         });
-    
     }
-
-    const sideDrawer = document.getElementById('sideDrawer');
-    const drawerHandle = document.getElementById('drawerHandle');
-    let isDragging = false;
-    let isHandleActive = false;
-    let startX, startLeft;
-    let longPressTimer;
-    const longPressDuration = 300; // milliseconds
-    
-    // Initialize the drawer on the right side
-    sideDrawer.classList.add('left');
-    
-    function openDrawer() {
-        sideDrawer.classList.add('open');
-        fetchUserProfile();
-        fetchChatHistory();
-    }
-    
-    function closeDrawer() {
-        sideDrawer.classList.remove('open');
-    }
-    
-    function toggleDrawer() {
-        sideDrawer.classList.toggle('open');
-        if (sideDrawer.classList.contains('open')) {
-            fetchUserProfile();
-            fetchChatHistory();
-        }
-    }
-    
-    drawerHandle.addEventListener('mousedown', startLongPress);
-    drawerHandle.addEventListener('touchstart', startLongPress);
-    
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('touchmove', drag);
-    
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-    
-    // Toggle drawer when clicking the handle
-    drawerHandle.addEventListener('click', () => {
-        toggleDrawer();
-    });
-    
-    function startLongPress(e) {
-        e.preventDefault(); // Prevent default behavior
-        isHandleActive = true; // Indicate that the handle was the initial target
-        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-        startLeft = sideDrawer.offsetLeft;
-    
-        longPressTimer = setTimeout(() => {
-            isDragging = true;
-            sideDrawer.classList.add('dragging');
-        }, longPressDuration);
-    }
-    
-    function drag(e) {
-        if (!isDragging) return;
-    
-        const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-        const diffX = currentX - startX;
-        const newLeft = startLeft + diffX;
-    
-        if (newLeft > window.innerWidth / 2) {
-            sideDrawer.style.left = '';
-            sideDrawer.style.right = '0';
-            sideDrawer.classList.remove('left');
-            sideDrawer.classList.add('right');
-        } else {
-            sideDrawer.style.right = '';
-            sideDrawer.style.left = '0';
-            sideDrawer.classList.remove('right');
-            sideDrawer.classList.add('left');
-        }
-    
-        openDrawer();
-    }
-    
-    function endDrag(e) {
-        clearTimeout(longPressTimer);
-    
-        if (isDragging) {
-            isDragging = false;
-            sideDrawer.classList.remove('dragging');
-        }
-    
-        // Reset the handle active state
-        isHandleActive = false;
-    }
-    
-    
-    
 
     function addMessage(content, type, imageUrl = null) {
+        addMessageToDOM(content, type, imageUrl);
+        if (currentConversationId) {
+            conversations[currentConversationId].push({ content, type, imageUrl, timestamp: Date.now });
+            saveToLocalStorage();
+        }
+    }
+
+    function addMessageToDOM(content, type, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
         let messageContent = `<p>${content}</p>`;
@@ -220,12 +210,112 @@ document.addEventListener('DOMContentLoaded', function() {
                     responseHTML = 'Sorry, I couldn\'t find any recommendations.';
                 }
                 addMessage(responseHTML, 'received');
+                saveChatToServer();
             })
             .catch(error => {
                 console.error('Error:', error);
                 removeTypingIndicator(typingIndicator);
                 addMessage('Sorry, there was an error processing your request.', 'received');
+                saveChatToServer();
             });
         }
     });
+
+    newChatButton.addEventListener('click', function() {
+        saveChatToServer();
+        switchConversation(createNewConversation());
+        fetchUserProfile(); // This will add the initial greeting message
+    });
+
+    // Sidebar functionality
+    const sideDrawer = document.getElementById('sideDrawer');
+    const drawerHandle = document.getElementById('drawerHandle');
+    let isDragging = false;
+    let isHandleActive = false;
+    let startX, startLeft;
+    let longPressTimer;
+    const longPressDuration = 300; // milliseconds
+    
+    // Initialize the drawer on the right side
+    sideDrawer.classList.add('left');
+    
+    function openDrawer() {
+        sideDrawer.classList.add('open');
+    }
+    
+    function closeDrawer() {
+        sideDrawer.classList.remove('open');
+    }
+    
+    function toggleDrawer() {
+        sideDrawer.classList.toggle('open');
+    }
+    
+    drawerHandle.addEventListener('mousedown', startLongPress);
+    drawerHandle.addEventListener('touchstart', startLongPress);
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+    
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+    
+    // Toggle drawer when clicking the handle
+    drawerHandle.addEventListener('click', () => {
+        toggleDrawer();
+    });
+    
+    function startLongPress(e) {
+        e.preventDefault(); // Prevent default behavior
+        isHandleActive = true; // Indicate that the handle was the initial target
+        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        startLeft = sideDrawer.offsetLeft;
+    
+        longPressTimer = setTimeout(() => {
+            isDragging = true;
+            sideDrawer.classList.add('dragging');
+        }, longPressDuration);
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+    
+        const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        const diffX = currentX - startX;
+        const newLeft = startLeft + diffX;
+    
+        if (newLeft > window.innerWidth / 2) {
+            sideDrawer.style.left = '';
+            sideDrawer.style.right = '0';
+            sideDrawer.classList.remove('left');
+            sideDrawer.classList.add('right');
+        } else {
+            sideDrawer.style.right = '';
+            sideDrawer.style.left = '0';
+            sideDrawer.classList.remove('right');
+            sideDrawer.classList.add('left');
+        }
+    
+        openDrawer();
+    }
+    
+    function endDrag(e) {
+        clearTimeout(longPressTimer);
+    
+        if (isDragging) {
+            isDragging = false;
+            sideDrawer.classList.remove('dragging');
+        }
+    
+        // Reset the handle active state
+        isHandleActive = false;
+    }
+
+    // Initialize
+    if (!currentConversationId) {
+        currentConversationId = createNewConversation();
+    }
+    loadCurrentConversation();
+    updateConversationsList();
+    fetchUserProfile();
 });

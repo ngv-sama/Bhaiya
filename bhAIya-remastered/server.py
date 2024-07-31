@@ -21,6 +21,20 @@ BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
 cred = credentials.Certificate("bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json")
 firebase_admin.initialize_app(cred)
 
+# File to store chat history
+CHAT_HISTORY_FILE = 'chat_history.json'
+
+def load_chat_history():
+    if os.path.exists(CHAT_HISTORY_FILE):
+        with open(CHAT_HISTORY_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_chat_history(chat_history):
+    with open(CHAT_HISTORY_FILE, 'w') as f:
+        json.dump(chat_history, f)
+
+chat_history = load_chat_history()
 
 @app.route('/')
 def login():
@@ -38,7 +52,6 @@ def verify_token():
         session['email'] = email
         session['uuid'] = hashlib.sha256(email.encode()).hexdigest()
         session['username'] = email.split('@')[0]
-        session['chat_history'] = []
         return jsonify({"success": True}), 200
     except auth.InvalidIdTokenError:
         return jsonify({"error": "Invalid token"}), 400
@@ -56,9 +69,7 @@ def handle_login():
         session['email'] = email
         session['username'] = username
         session['uuid'] = hashlib.sha256(username.encode()).hexdigest()
-        session['chat_history'] = []
         logging.info(f"User {username} logged in")
-        logging.info(f"Chat History Initialized  to: {session['chat_history']}")
         if user_type == 'user':
             return redirect(url_for('index'))
         else:
@@ -78,8 +89,6 @@ def get_profile():
 
 @app.route('/logout')
 def logout():
-    if 'chat_history' in session and session['chat_history']:
-        save_chat_history()
     session.clear()
     return redirect(url_for('login'))
 
@@ -125,11 +134,6 @@ def get_recommendations():
         
         if response.ok:
             result = response.json()
-            # Save the user's question and the assistant's response
-            session['chat_history'].append({
-                'user': data,
-                'assistant': result
-            })
             return jsonify(result)
         else:
             return jsonify({"error": f"FastAPI error: {response.text}"}), 500
@@ -153,54 +157,37 @@ def item_page(item_id):
     }
     return render_template('item.html', item=item_details)
 
-@app.route('/save_chat_history', methods=['GET'])
+@app.route('/save_chat_history', methods=['POST'])
 def save_chat_history():
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
-    
-    chat_history = session.get('chat_history', [])
-    if not chat_history:
-        return jsonify({"message": "No chat history to save"}), 200
 
-    data = {
-        "uuid": session['uuid'],
+    user_uuid = session['uuid']
+    data = request.json
+
+    chat_history[user_uuid] = {
         "email": session['email'],
-        "chat_date": datetime.now().isoformat(),
-        "chat_history": chat_history
+        "last_updated": datetime.now().isoformat(),
+        "conversations": data['conversations'],
+        "currentConversationId": data['currentConversationId']
     }
     
-    file_path ='chat_history.json'
-
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4) 
-
-    logging.info("Sending Data to Backend...", flush=True)
-
-    try:
-        response = requests.post(f"{BACKEND_URL}/chat_history", json=data)
-        if response.ok:
-            session['chat_history'] = []  # Clear the chat history after saving
-            return jsonify({"message": "Chat history saved successfully"}), 200
-        else:
-            return jsonify({"error": f"Error saving chat history: {response.text}"}), 500
-    except Exception as e:
-        print(f"Error saving chat history: {str(e)}")
-        return jsonify({"error": f"Error saving chat history: {str(e)}"}), 500
+    save_chat_history(chat_history)
+    
+    return jsonify({"message": "Chat history saved successfully"}), 200
 
 @app.route('/get_chat_history', methods=['GET'])
 def get_chat_history():
     if not session.get('logged_in'):
         return jsonify({"error": "Not logged in"}), 401
 
-    try:
-        response = requests.get(f"{BACKEND_URL}/chat_history/{session['uuid']}")
-        if response.ok:
-            return jsonify(response.json()), 200
-        else:
-            return jsonify({"error": f"Error fetching chat history: {response.text}"}), 500
-    except Exception as e:
-        print(f"Error fetching chat history: {str(e)}")
-        return jsonify({"error": f"Error fetching chat history: {str(e)}"}), 500
+    user_uuid = session['uuid']
+    user_history = chat_history.get(user_uuid, {})
+
+    if user_history:
+        return jsonify(user_history), 200
+    else:
+        return jsonify({"conversations": {}, "currentConversationId": None}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
