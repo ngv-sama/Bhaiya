@@ -191,12 +191,14 @@ async def addHistory(data:dict):
     current_data = mongoDatabase["history"].find(
         {"currentConversationId": id}, {"_id": 0}
     )
-    if(current_data):
-        current_data["last_updated"]=incoming_data["last_updated"]
-        for convId in incoming_data["conversations"]:
-            if convId not in current_data["conversations"]:
-                current_data["conversations"]["convId"]=incoming_data["conversations"]["convId"]
-        print(current_data)
+    current_data=list(current_data)
+    if(current_data!=[]):
+        conversations=incoming_data["conversations"]
+        last_updated=incoming_data["last_updated"]
+        x = mongoDatabase["history"].update_one(
+            {"currentConversationId": id}, {"$set": {"conversations":conversations,"last_updated":last_updated}}
+        )
+        print(x)
     else:
         x=mongoDatabase["history"].insert_one(data)
         print(x)
