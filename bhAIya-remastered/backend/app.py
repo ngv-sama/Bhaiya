@@ -184,6 +184,15 @@ async def getCategories(data:dict):
     print(data_send)
     return data_send
 
+@app.get("/getHistory")
+async def getHistory(data:dict):
+    id = data["currentConversationId"]
+    data = mongoDatabase["history"].find(
+        {"currentConversationId": id}, {"_id": 0}
+    )
+    data=list(data)[0]
+    return data
+
 @app.post("/addHistory")
 async def addHistory(data:dict):
     incoming_data=data

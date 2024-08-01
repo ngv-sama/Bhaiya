@@ -57,7 +57,17 @@ def getCategoriesFromText(modelname,description,ollama=True):
     if(ollama):
         try:
             print("Processing text..")
-            with requests.post(f"{BASEURL}/api/generate",json={"model":modelname,"prompt":prompt},stream=True) as response:
+            with requests.post(
+                f"{BASEURL}/api/generate",
+                json={
+                    "model": modelname,
+                    "prompt": prompt,
+                    "options": {
+                        "temperature": 0.2
+                    },
+                },
+                stream=True,
+            ) as response:
                 print(response)
                 for line in response.iter_lines():
                     if line:
@@ -123,7 +133,16 @@ def getcategoriesFromImage(modelname,imagePath,imgb64=None,ollama=True):
                 imageb64 = encodedimage(imagePath)
             else:
                 imageb64=imgb64
-            with requests.post(f"{BASEURL}/api/generate",json={"model":modelname,"prompt":prompt,"images":[imageb64]},stream=True) as response:
+            with requests.post(
+                f"{BASEURL}/api/generate",
+                json={
+                    "model": modelname,
+                    "prompt": prompt,
+                    "images": [imageb64],
+                    "options": {"temperature": 0.2},
+                },
+                stream=True,
+            ) as response:
                 for line in response.iter_lines():
                     if line:
                         chunk = json.loads(line)
