@@ -11,7 +11,7 @@ from streamlit_navigation_bar import st_navbar
 
 page = st_navbar(["Home" ,"Add","Remove" ,"Products" ,"Sales","Customer details ","Support"])
 
-st.logo("C:/Users/Administrator 1/Desktop/baby.jpg")
+# st.logo("C:/Users/Administrator 1/Desktop/baby.jpg")
 
 ##08082A; 
 ##extra colour replacement

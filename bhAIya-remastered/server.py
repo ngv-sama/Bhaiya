@@ -14,7 +14,7 @@ from datetime import datetime
 import logging
 from dotenv import load_dotenv
 
-load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
@@ -79,7 +79,7 @@ def handle_login():
         if user_type == 'user':
             return redirect(url_for('index'))
         else:
-            return redirect(url_for('dashboard'))
+            return redirect('http://localhost:8501')
     else:
         return render_template('login.html', error="Invalid credentials")
 
