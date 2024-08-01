@@ -51,8 +51,9 @@ async def data(data:dict):
     #     print(f"An error occured while reading the image database: {e}")
     text=data.get("text",None)
     img64=data.get("img64",None)
-    if(img64[0]=='b'):
-        img64=img64[2:-1]
+    if(img64):
+        if(img64[0]=='b'):
+            img64=img64[2:-1]
     categories={}
     print(text)
     if(text!=None):

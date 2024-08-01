@@ -12,6 +12,9 @@ import hashlib
 import json
 from datetime import datetime
 import logging
+from dotenv import load_dotenv
+
+load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
@@ -152,7 +155,7 @@ def get_recommendations():
 # def item_page(item_id):
 #     if not session.get('logged_in'):
 #         return redirect(url_for('login'))
-    
+
 #     item_details = {
 #         "id": item_id,
 #         "price": "N/A",
@@ -203,7 +206,7 @@ def get_chat_history():
         return jsonify(user_history), 200
     else:
         return jsonify({"conversations": {}, "currentConversationId": None}), 200
-    
+
 
 @app.route('/get_details', methods=['POST'])
 def get_details():
