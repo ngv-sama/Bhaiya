@@ -57,9 +57,13 @@ async def data(data:dict):
     categories={}
     print(text)
     if(text!=None):
-        textCategories=getCategoriesFromText("mistral",text,ollama=True)["categories"][0]
+        textCategories = getCategoriesFromText("gemma2:2b", text, ollama=True)[
+            "categories"
+        ][0]
     if(img64!=None):
-        imgCategories=getcategoriesFromImage("llava",imagePath=None,imgb64=img64,ollama=True)["categories"][0]
+        imgCategories = getcategoriesFromImage(
+            "llava-phi3:latest", imagePath=None, imgb64=img64, ollama=True
+        )["categories"][0]
     if(text!=None and img64!=None):
         for key in textCategories.keys():
             categories[key]=list(set(textCategories[key]+imgCategories[key]))

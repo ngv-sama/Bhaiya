@@ -65,6 +65,7 @@ def getCategoriesFromText(modelname,description,ollama=True):
                     "options": {
                         "temperature": 0.2
                     },
+                    "format":"json"
                 },
                 stream=True,
             ) as response:
@@ -113,7 +114,8 @@ def getcategoriesFromImage(modelname,imagePath,imgb64=None,ollama=True):
                 - No trailing commas after the last item in lists or objects.
                 -Remove the introductory text and final note from JSON.
                 -Do not enclose the response in any type of code block.
-                -The categories key should contain a list that has one dictionary
+                -The categories key should contain a list that has one dictionary.
+                -Ensure that the JSON response is properly enclosed in brackets.
 
                 The response format should be:
                 {{
@@ -140,6 +142,7 @@ def getcategoriesFromImage(modelname,imagePath,imgb64=None,ollama=True):
                     "prompt": prompt,
                     "images": [imageb64],
                     "options": {"temperature": 0.2},
+                    "format":"json"
                 },
                 stream=True,
             ) as response:
@@ -157,7 +160,7 @@ def getcategoriesFromImage(modelname,imagePath,imgb64=None,ollama=True):
     else:
         pass
     try:
-        res = json.loads(res[8:-4].strip())
+        res = json.loads(res)
     except Exception as e:
         print("Exception occured while parsing the response: ",e)
         res=""
@@ -174,15 +177,19 @@ def getcategoriesFromImage(modelname,imagePath,imgb64=None,ollama=True):
                         res += response_piece
                     else:
                         break
-        res=getCategoriesFromText("mistral",res,ollama=True)
+        res=getCategoriesFromText("gemma2:2b",res,ollama=True)
     return res
 
 # print(
 #     getCategoriesFromText(
-#         "mistral",
+#         "gemma2:2b",
 #         "Men Apparel Topwear Shirts Navy Blue Fll 2011 Casual Turtle Check Men Navy Blue Shirt",
-#         ollama=False,
+#         ollama=True,
 #     )
 # )
 
-# print(getcategoriesFromImage("llava", "/Users/rachitdas/Desktop/data/images/14147.jpg"))
+# print(
+#     getcategoriesFromImage(
+#         "llava-phi3:latest", "/Users/rachitdas/Desktop/data/images/14147.jpg"
+#     )
+# )
