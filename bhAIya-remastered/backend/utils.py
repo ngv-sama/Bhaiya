@@ -259,6 +259,7 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
         pass
     try:
         res = json.loads(res)
+        res = json.loads(res)
     except Exception as e:
         print("Exception occurred while parsing the response: ", e)
         res = ""
