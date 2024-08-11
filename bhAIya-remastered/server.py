@@ -14,7 +14,8 @@ from datetime import datetime
 import logging
 from dotenv import load_dotenv
 
-load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
+# load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
@@ -216,7 +217,7 @@ def get_details():
     product_id = request.json.get('id')
     print("Product ID:", product_id)
 
-    id_data={"id":int(product_id)}
+    id_data={"id":str(product_id)}
     
     try:
         response = requests.post(f"{BACKEND_URL}/getCategories", json=id_data)

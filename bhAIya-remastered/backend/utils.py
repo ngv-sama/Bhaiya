@@ -105,6 +105,90 @@ def perform_request(url, data, stream=False, use_pycurl=True, session=None):
         response=request_func(url, json=data, stream=stream)
         return accumulate_response(response)
 
+def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycurl=True):
+    prompt = f"""
+    [INST]
+        Your task is to generate relevant product categories based on the user's search query: "{query}". Generate categories that would be suitable for products matching this query. Provide the output in JSON format, following these guidelines strictly:
+
+        1. Generate categories following these steps:
+        - Identify main categories that broadly encompass products related to the search query.
+        - Generate subcategories that further specify types of products within the main categories.
+        - Include additional details or categories that might be relevant to the search query.
+
+        2. Follow these JSON formatting rules:
+        - No additional text should be generated, only the JSON object with the categories.
+        - Use double quotes for all string values.
+        - No trailing commas after the last item in lists or objects.
+        - Do not enclose the response in any type of code block.
+        - The categories key should contain a list with one dictionary.
+        - 'Main category', 'Sub categories', and 'Additional details' should each be a list containing comma-separated strings.
+
+        3. Consider these points while generating categories:
+        - Focus on general product categories rather than specific brands.
+        - Include relevant attributes like occasion, season, target demographic, etc., when applicable.
+        - Consider various interpretations of the query to provide a comprehensive set of categories.
+
+        The response format should be:
+        {{
+            "categories": [{{
+                "Main category": ["Generated main categories..."],
+                "Sub categories": ["Generated sub categories..."],
+                "Additional details": ["Generated additional details or categories..."]
+            }}]
+        }}
+
+        Example 1:
+        Query: "Can you please help me with some winter holiday gift suggestions"
+        {{
+            "categories": [{{
+                "Main category": ["Gifts", "Holiday Items"],
+                "Sub categories": ["Decorations", "Accessories", "Home Decor"],
+                "Additional details": ["Winter", "Festive", "Family", "Traditional", "Modern"]
+            }}]
+        }}
+
+        - Ensure that the response includes three fields: Main category, Sub categories, and Additional details.
+        - Only return these 3 fields in the response. Include all details within these fields only.
+        - Do not add any aditional text apart from these fields 
+    [/INST]
+    """
+    res = ""
+    if ollama:
+        try:
+            print("Processing text..")
+            data = {
+                "model": modelname,
+                "prompt": prompt,
+                "format": "json",
+                "options": {
+                    "temperature": 0.2
+                },
+            }
+            res = perform_request(f"{BASEURL}/api/generate", data, stream=False, use_pycurl=use_pycurl, session=session)
+        except Exception as e:
+            print(f"An error occurred with ollama using text: {e}")
+    else:
+        try:
+            print("Processing text...")
+            modelIns = HuggingFaceEndpoint(
+                repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+                huggingfacehub_api_token="token_here",
+            )
+            res = modelIns.invoke(prompt)
+        except Exception as e:
+            print(f"Error when API is used: {e}")
+            pass
+    try:
+        print(res)
+        res = json.loads(res)
+    except Exception as e:
+        print("Exception occurred while parsing the response: ", e)
+        res = None
+    return res
+    
+
+
+
 def getCategoriesFromText(modelname, description, ollama=True, session=None, use_pycurl=True):
     prompt = f"""
     [INST]
