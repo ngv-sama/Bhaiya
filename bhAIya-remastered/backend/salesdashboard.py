@@ -662,7 +662,7 @@ with col1:
 with col2:
     st.metric("Total Categories", total_categories)
 with col3:
-    st.metric("Average Price", f"Rs. {avg_price:.2f}")
+    st.metric("Average Transaction Sale", f"Rs. {avg_price:.2f}")
 
 # Product Category Distribution
 st.subheader("Product Category Distribution")
