@@ -281,7 +281,7 @@ def generate_image_description():
         if response.ok:
             product_details = response.json()
             image_data = product_details.get('image')
-            image_data=image_data[2:-1]
+            # image_data=image_data[2:-1]
             
             if not image_data:
                 return jsonify({"error": "No image data found"}), 400
