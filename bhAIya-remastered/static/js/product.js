@@ -133,6 +133,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessage(content, type) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
+        
+        // Basic formatting
+        content = content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+            .replace(/\*(.*?)/g, '') 
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')  // Italic
+            .replace(/`(.*?)`/g, '<code>$1</code>')  // Inline code
+            .replace(/\n/g, '<br>')  // Line breaks 
+            .replace(/```([\s\S]*?)```/g, function(match, p1) {
+                return '<pre><code>' + p1.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
+            });  // Code blocks
+    
         messageDiv.innerHTML = `<p>${content}</p>`;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;

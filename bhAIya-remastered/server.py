@@ -183,18 +183,6 @@ def get_recommendations():
         print(traceback.format_exc())
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-# @app.route('/item/<int:item_id>')
-# def item_page(item_id):
-#     if not session.get('logged_in'):
-#         return redirect(url_for('login'))
-
-#     item_details = {
-#         "id": item_id,
-#         "price": "N/A",
-#         "image": "placeholder_image_data"
-#     }
-#     return render_template('item.html', item=item_details)
-
 @app.route('/item/<int:item_id>')
 def item_page(item_id):
     if not session.get('logged_in'):
