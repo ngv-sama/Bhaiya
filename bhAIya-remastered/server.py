@@ -13,6 +13,8 @@ import json
 from datetime import datetime
 import logging
 from dotenv import load_dotenv
+from io import BytesIO
+import pycurl
 
 # load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
 load_dotenv()
@@ -26,6 +28,22 @@ OLLAMA_URL = os.getenv("OLLAMA_URL_SERVER")
 cred = credentials.Certificate("bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json")
 firebase_admin.initialize_app(cred)
 
+# def ollama_request(model, prompt, image=None):
+#     url = f"{OLLAMA_URL}/api/generate"
+#     data = {
+#         "model": model,
+#         "prompt": prompt,
+#         "stream": False
+#     }
+#     if image:
+#         data["images"] = [image]
+    
+#     response = requests.post(url, json=data)
+#     if response.status_code == 200:
+#         return response.json()["response"]
+#     else:
+#         raise Exception(f"Ollama request failed: {response.text}")
+
 def ollama_request(model, prompt, image=None):
     url = f"{OLLAMA_URL}/api/generate"
     data = {
@@ -36,11 +54,24 @@ def ollama_request(model, prompt, image=None):
     if image:
         data["images"] = [image]
     
-    response = requests.post(url, json=data)
-    if response.status_code == 200:
-        return response.json()["response"]
-    else:
-        raise Exception(f"Ollama request failed: {response.text}")
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, url)
+    c.setopt(c.WRITEDATA, buffer)
+    c.setopt(c.HTTPHEADER, ['Content-Type: application/json'])
+    c.setopt(c.POST, 1)
+    c.setopt(c.POSTFIELDS, json.dumps(data))
+    
+    try:
+        c.perform()
+        status_code = c.getinfo(pycurl.HTTP_CODE)
+        if status_code == 200:
+            body = buffer.getvalue().decode('utf-8')
+            return json.loads(body)["response"]
+        else:
+            raise Exception(f"Ollama request failed: {buffer.getvalue().decode('utf-8')}")
+    finally:
+        c.close()
 
 
 @app.route('/')
@@ -260,7 +291,7 @@ def product_chat():
             """
             
             # Generate response using Llama 3.1
-            response = ollama_request("mistral", prompt)
+            response = ollama_request("gemma2:2b", prompt)
             
             return jsonify({"response": response})
         else:
