@@ -63,7 +63,8 @@ class ImageDatabaseCreator:
         session = requests.Session()
         try:
             for filename in image_files:
-                file_id = int(filename[:filename.index(".")])
+                # file_id = int(filename[:filename.index(".")])
+                file_id = filename[:filename.index(".")]
                 image_path = f"{BASE_PATH}\{filename}"
                 results[file_id] = getcategoriesFromImage("llava-phi3", image_path, ollama=True, session=session, use_pycurl=True)["categories"]
                 results[file_id][0]["image"] = encodedimage(image_path)
@@ -90,31 +91,31 @@ class DatabaseCreator:
         finalResults = []
         imageResults = []
         
-        print("Processing text data...")
-        if os.path.exists(f"{os.getcwd()}/textResult.json"):
-            with open(f"{os.getcwd()}/textResult.json", "r") as infile:
-                textResult = json.load(infile)
-                print("TextResult JSON Found")
-        else:
-            tdc = TextDatabaseCreator(self.data, self.idColumn, self.columnsToAccept, self.priceColumn)
-            textResult = tdc.create_database()
-            with open(f"{os.getcwd()}/textResult.json", "w") as outfile:
-                json.dump(textResult, outfile)
-                print("Saved textResult.json")
+        # print("Processing text data...")
+        # if os.path.exists(f"{os.getcwd()}/textResult.json"):
+        #     with open(f"{os.getcwd()}/textResult.json", "r") as infile:
+        #         textResult = json.load(infile)
+        #         print("TextResult JSON Found")
+        # else:
+        #     tdc = TextDatabaseCreator(self.data, self.idColumn, self.columnsToAccept, self.priceColumn)
+        #     textResult = tdc.create_database()
+        #     with open(f"{os.getcwd()}/textResult.json", "w") as outfile:
+        #         json.dump(textResult, outfile)
+        #         print("Saved textResult.json")
         
         
         print("\nProcessing image data...")
-        if os.path.exists(f"{os.getcwd()}/imageResult.json"):
-            with open(f"{os.getcwd()}/imageResult.json", "r") as infile:
+        if os.path.exists(f"{os.getcwd()}/imageAmazonResult.json"):
+            with open(f"{os.getcwd()}/imageAmazonResult.json", "r") as infile:
                 imageResult = json.load(infile)
                 print("ImageResult JSON Found")
         else:
             print(self.imgfoldername)
             idc = ImageDatabaseCreator(self.imgfoldername)
             imageResult = idc.create_database()
-            with open(f"{os.getcwd()}/imageResult.json", "w") as outfile:
+            with open(f"{os.getcwd()}/imageAmazonResult.json", "w") as outfile:
                 json.dump(imageResult, outfile) 
-                print("Saved imageResult.json")
+                print("Saved imageAmazonResult.json")
 
         
         
@@ -175,7 +176,8 @@ if __name__ == "__main__":
     data = pd.read_csv(DATASET_PATH, on_bad_lines="skip")
     data = data.head(top_n_rows)
 
-    IMAGES_PATH = r"C:\Users\nikhi\Downloads\bhAIya dataset\selected_images"
+    # IMAGES_PATH = r"C:\Users\nikhi\Downloads\bhAIya dataset\selected_images"
+    IMAGES_PATH = r"C:\Users\nikhi\Downloads\bhAIya dataset\amazon dataset\betterImages\betterImages"
 
     dc = DatabaseCreator(data, idColumn, columnsToAccept, priceColumn, IMAGES_PATH)
     dc.create_database()
