@@ -183,11 +183,11 @@ def get_recommendations():
         print(traceback.format_exc())
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-@app.route('/item/<int:item_id>')
+@app.route('/item/<string:item_id>')
 def item_page(item_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    return render_template('item.html', item_id=item_id)
+    return render_template('item.html', item_id=str(item_id))
 
 @app.route('/save_chat_history', methods=['POST'])
 def save_chat_history():

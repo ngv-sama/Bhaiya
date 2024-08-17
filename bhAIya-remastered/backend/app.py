@@ -15,16 +15,29 @@ images_path = os.getenv("SAMPLE_DATABASE_IMAGE")
 
 mongoDatabase=MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 
+# DATABASE_NAME="database"
+# DATABASE_NAME="database_500"
+# DATABASE_NAME="amazon_database"
+DATABASE_NAME="only_clothes"
+
+# IMAGES_DATABASE= "imageDatabase"
+# IMAGES_DATABASE= "imageDatabase_500"
+# IMAGES_DATABASE = "amazon_images"
+IMAGES_DATABASE = "only_clothes_images"
+
+
 try:
     # database = mongoDatabase["database"].find({}, {"_id": 0})
-    database = mongoDatabase["database_500"].find({}, {"_id": 0})
+    # database = mongoDatabase["database_500"].find({}, {"_id": 0})
+    database = mongoDatabase[DATABASE_NAME].find({}, {"_id":0})
     database=list(database)
     print("Data loaded")
 except Exception as e:
     print("Error loading main database")
 try:
     # imgDatabase = mongoDatabase["imageDatabase"].find({}, {"_id": 0})
-    imgDatabase = mongoDatabase["imageDatabase_500"].find({}, {"_id": 0})
+    # imgDatabase = mongoDatabase["imageDatabase_500"].find({}, {"_id": 0})
+    imgDatabase = mongoDatabase[IMAGES_DATABASE].find({}, {"_id":0})
     imgDatabase=list(imgDatabase)
     print("Image database loaded")
 except Exception as e:
@@ -183,9 +196,17 @@ async def addMany(data:dict):
 async def getCategories(data:dict):
     id=data["id"]
     # data=mongoDatabase["database"].find({"id":int(id)},{"_id":0})
-    data=mongoDatabase["database_500"].find({"id":str(id)},{"_id":0})
-    imageData=getImage(imgDatabase,str(id))
-    data_send=list(data)[0]
+    # data=mongoDatabase["database_500"].find({"id":str(id)},{"_id":0})
+    try:
+        data=mongoDatabase[DATABASE_NAME].find({"id":str(id)},{"_id":0})
+        imageData=getImage(imgDatabase,str(id))
+        data_send=list(data)[0]
+    
+    except Exception as e:
+        data=mongoDatabase[DATABASE_NAME].find({"id":int(id)},{"_id":0})
+        imageData=getImage(imgDatabase,int(id))
+        data_send=list(data)[0]
+
     data_send["image"]=imageData
     print(data_send)
     return data_send
