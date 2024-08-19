@@ -16,15 +16,15 @@ images_path = os.getenv("SAMPLE_DATABASE_IMAGE")
 mongoDatabase=MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 
 try:
-    # database = mongoDatabase["database"].find({}, {"_id": 0})
-    database = mongoDatabase["database_500"].find({}, {"_id": 0})
+    database = mongoDatabase["database"].find({}, {"_id": 0})
+    # database = mongoDatabase["database_500"].find({}, {"_id": 0})
     database=list(database)
     print("Data loaded")
 except Exception as e:
     print("Error loading main database")
 try:
-    # imgDatabase = mongoDatabase["imageDatabase"].find({}, {"_id": 0})
-    imgDatabase = mongoDatabase["imageDatabase_500"].find({}, {"_id": 0})
+    imgDatabase = mongoDatabase["imageDatabase"].find({}, {"_id": 0})
+    # imgDatabase = mongoDatabase["imageDatabase_500"].find({}, {"_id": 0})
     imgDatabase=list(imgDatabase)
     print("Image database loaded")
 except Exception as e:
@@ -182,8 +182,8 @@ async def addMany(data:dict):
 @app.post("/getCategories")
 async def getCategories(data:dict):
     id=data["id"]
-    # data=mongoDatabase["database"].find({"id":int(id)},{"_id":0})
-    data=mongoDatabase["database_500"].find({"id":str(id)},{"_id":0})
+    data=mongoDatabase["database"].find({"id":int(id)},{"_id":0})
+    # data=mongoDatabase["database_500"].find({"id":str(id)},{"_id":0})
     imageData=getImage(imgDatabase,str(id))
     data_send=list(data)[0]
     data_send["image"]=imageData

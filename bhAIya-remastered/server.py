@@ -16,8 +16,8 @@ from dotenv import load_dotenv
 from io import BytesIO
 import pycurl
 
-# load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
-load_dotenv()
+load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
+# load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
