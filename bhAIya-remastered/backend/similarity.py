@@ -90,13 +90,6 @@ def find_top_k_similar(match_data, data_list, top_k=3):
 
     similarities = []
 
-    # for data in data_list:
-    #     main_similarity = compute_similarity(model, match_main, data["Main category"])
-    #     sub_similarity = compute_similarity(model, match_sub, data["Sub categories"])
-    #     additional_similarity = compute_similarity(model, match_additional, data["Additional details"])
-    #     weighted_similarity = weighted_average_similarity(main_similarity, sub_similarity,additional_similarity)
-    #     similarities.append((weighted_similarity, data))
-
     for data in data_list:
         main_similarity = compute_similarity(match_main, data["Main category"])
         sub_similarity = compute_similarity(match_sub, data["Sub categories"])
