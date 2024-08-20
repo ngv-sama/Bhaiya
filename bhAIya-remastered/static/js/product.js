@@ -48,28 +48,30 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            let detailsHTML = '<h2>Product Details</h2>';
-            
+            console.log(data);
             if (data.error) {
-                detailsHTML += `<p>Error: ${data.error}</p>`;
+                detailsHTML = `<div class="error-message"><p>Error: ${data.error}</p></div>`;
             } else {
-                // Display the image
-                if (data.image) {
-                    let base64Image = data.image;
-                    if (base64Image.startsWith("b'")) {
-                        base64Image = base64Image.slice(2, -1);
-                    }
-                    detailsHTML += `<img src="data:image/jpeg;base64,${base64Image}" alt="Product Image" style="max-width: 100%; margin-bottom: 20px;">`;
-                }
-
-                // Display other details
-                for (const [key, value] of Object.entries(data)) {
-                    if (key !== 'image') {
-                        detailsHTML += `<p><strong>${key}:</strong> ${value}</p>`;
-                    }
-                }
+                detailsHTML = `
+                    <div class="product-image-container">
+                        ${data.image ? `<img src="data:image/jpeg;base64,${data.image.startsWith("b'") ? data.image.slice(2, -1) : data.image}" alt="Product Image">` : ''}
+                    </div>
+                    <div class="product-info">
+                        <h2>Product Details</h2>
+                        <div class="product-meta">
+                            ${data.price ? `<div class="product-price">₹${data.price}</div>` : ''}
+                            ${data.id ? `<div class="product-id">ID: ${data.id}</div>` : ''}
+                        </div>
+                        <div class="product-categories">
+                            ${data['Main category'] ? data['Main category'].map(cat => `<div class="category main-category">${cat}</div>`).join('') : ''}
+                            
+                         </div>
+                        <div class="product-categories">
+                            ${data['Sub categories'] ? data['Sub categories'].map(cat => `<div class="category sub-category">${cat}</div>`).join('') : ''}
+                         </div>
+                        
+                    </div>`;
             }
-
             productDetails.innerHTML = detailsHTML;
             generateImageDescription(productId);
         })
@@ -133,6 +135,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessage(content, type) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
+        
+        // Basic formatting
+        content = content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+            .replace(/\*(.*?)/g, '') 
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')  // Italic
+            .replace(/`(.*?)`/g, '<code>$1</code>')  // Inline code
+            .replace(/\n/g, '<br>')  // Line breaks 
+            .replace(/```([\s\S]*?)```/g, function(match, p1) {
+                return '<pre><code>' + p1.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
+            });  // Code blocks
+    
         messageDiv.innerHTML = `<p>${content}</p>`;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;

@@ -333,6 +333,7 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
                 "model": modelname,
                 "prompt": prompt,
                 "images": [imageb64],
+                "keep_alive": "10m",
                 "options": {"temperature": 0.2},
             }
             res = perform_request(f"{BASEURL}/api/generate", data, stream=False, use_pycurl=use_pycurl, session=session)

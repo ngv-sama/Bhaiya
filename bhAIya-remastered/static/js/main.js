@@ -126,11 +126,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function addMessageToDOM(content, type, imageUrl = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
-        let messageContent = `<p>${content}</p>`;
-        if (imageUrl) {
-            messageContent = `<img src="${imageUrl}" alt="User uploaded image"><p>${content}</p>`;
+        let messageContent;
+        if(content){
+            messageContent = `<p>${content}`;
         }
-        messageDiv.innerHTML = messageContent;
+        if (imageUrl) {
+            messageContent = `<img src="${imageUrl}" alt="User uploaded image"><p>${content}`;
+        }
+        if(messageContent){
+            messageDiv.innerHTML = messageContent;
+        }
+        console.log(messageDiv)
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -193,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 console.log("Received data:", data);
                 removeTypingIndicator(typingIndicator);
-                let responseHTML = 'Here are some recommendations:';
+                let responseHTML = 'Hey! Found something you might like. Take a look:';
                 if (Array.isArray(data) && data.length > 0) {
                     responseHTML += '<div class="product-grid">';
                     data.forEach(item => {
