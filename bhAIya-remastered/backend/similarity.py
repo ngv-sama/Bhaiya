@@ -5,7 +5,7 @@ from Levenshtein import distance
 import sys
 import requests
 from dotenv import load_dotenv
-from utils import perform_request
+from utils import curl_request_embed
 import os
 import redis
 import pickle
@@ -48,7 +48,10 @@ def sentence_vector(sentence):
             embeddings.append(res)
         else:
             try:
-                embedding_json=requests.post(f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",json={"model":os.getenv("EMBEDDING_MODEL"),"input":word}).json()
+                embedding_json = curl_request_embed(
+                    f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",
+                    data={"model": os.getenv("EMBEDDING_MODEL"), "input": word}
+                )
                 embeds=embedding_json["embeddings"][0]
                 if(embeds!=np.nan):
                     embeddings.append(embeds)
