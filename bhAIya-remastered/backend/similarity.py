@@ -36,10 +36,6 @@ def get_embedding_cache(key):
 
 
 def sentence_vector(sentence):
-    # words = [word for word in sentence if word in model.wv]
-    # if not words:
-    #     return np.zeros(model.vector_size)
-    # return np.mean(model.wv[words], axis=0)
     embedding_json=None
     embeddings=[]
     for word in sentence:
@@ -69,10 +65,6 @@ def sentence_vector(sentence):
 def compute_similarity(text1, text2):
     vec1 = sentence_vector(text1)
     vec2 = sentence_vector(text2)
-    # print(vec1)
-    # print(vec2)
-    # sys.exit()
-    # return cosine_similarity([vec1], [vec2])[0][0]
     res=0
     try:
         res=cosine_similarity(vec1.reshape(1,-1), vec2.reshape(1,-1))[0][0]
