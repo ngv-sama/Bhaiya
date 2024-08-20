@@ -206,7 +206,6 @@ async def getCategories(data:dict):
         data=mongoDatabase[DATABASE_NAME].find({"id":int(id)},{"_id":0})
         imageData=getImage(imgDatabase,int(id))
         data_send=list(data)[0]
-
     data_send["image"]=imageData
     print(data_send)
     return data_send
