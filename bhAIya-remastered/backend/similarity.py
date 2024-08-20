@@ -18,7 +18,7 @@ def update_embedding_cache(key,embedding):
     embedding=embedding
     try:
         embedding=pickle.dumps(embedding)
-        redis_client.set(key,embedding)
+        redis_client.set(key.lower(),embedding)
         print("Embedding cache updated")
     except Exception as e:
         print(f"Error in updating embedding cache: {e}")
@@ -26,10 +26,10 @@ def update_embedding_cache(key,embedding):
 
 
 def get_embedding_cache(key):
+    key=key.lower()
     res=None
     if(redis_client.exists(key)):
         res=redis_client.get(key)
-    if(res):
         print("fetching from cache")
         res=pickle.loads(res)
     return res
@@ -44,16 +44,20 @@ def sentence_vector(sentence):
     embeddings=[]
     for word in sentence:
         res=get_embedding_cache(word)
-        if(res):
+        if(res!=None):
             embeddings.append(res)
         else:
             try:
                 embedding_json=requests.post(f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",json={"model":os.getenv("EMBEDDING_MODEL"),"input":word}).json()
-                embeds=embedding_json["embeddings"]
+                embeds=embedding_json["embeddings"][0]
                 if(embeds!=np.nan):
                     embeddings.append(embeds)
                 else:
-                    embeddings.append(np.zeros(1024))
+                    print("ISNAN")
+                    print(word)
+                    sys.exit()
+                    embeds = np.zeros(1024)
+                    embeddings.append(embeds)
                 update_embedding_cache(word, embeds)
             except Exception as e:
                 print(f"Error in generating embedding: {e}")

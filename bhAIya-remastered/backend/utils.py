@@ -114,6 +114,8 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
         - Identify main categories that broadly encompass products related to the search query.
         - Generate subcategories that further specify types of products within the main categories.
         - Include additional details or categories that might be relevant to the search query.
+        - Do not include sentences and only provide the categories.
+        - Keep each category limited to two or three words.
 
         2. Follow these JSON formatting rules:
         - No additional text should be generated, only the JSON object with the categories.
@@ -127,6 +129,10 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
         - Focus on general product categories rather than specific brands.
         - Include relevant attributes like occasion, season, target demographic, etc., when applicable.
         - Consider various interpretations of the query to provide a comprehensive set of categories.
+        - Be very convervative in generating categories and avoid any irrelevant or unnecessary details.
+        - Ensure that the categories are general and applicable to a wide range of products.
+        - Ensure that you pay attention to the colur and pattern of the product.
+        - Do not generate duplicate categories.
 
         The response format should be:
         {{
@@ -149,7 +155,7 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
 
         - Ensure that the response includes three fields: Main category, Sub categories, and Additional details.
         - Only return these 3 fields in the response. Include all details within these fields only.
-        - Do not add any aditional text apart from these fields 
+        - Do not add any additional text apart from these fields 
     [/INST]
     """
     res = ""
@@ -185,8 +191,6 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
         print("Exception occurred while parsing the response: ", e)
         res = None
     return res
-    
-
 
 
 def getCategoriesFromText(modelname, description, ollama=True, session=None, use_pycurl=True):
@@ -214,6 +218,10 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
         - If a brand is mentioned, make sure to include it within the additional details.
         - Use words that can be used to describe the product in a general sense, such as color, pattern, shape, etc.
         - If there is anything in particular about the product that stands out, make sure to include it in the additional details.
+        - Be very convervative in generating categories and avoid any irrelevant or unnecessary details.
+        - Ensure that the categories are general and applicable to a wide range of products.
+        - Ensure that you pay attention to the colur and pattern of the product.
+        - Do not generate duplicate categories.
 
         The response format should be:
         {{
@@ -303,6 +311,10 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
         - Do not make assumptions about the brand of the product.
         - Use words that can be used to describe the product in a general sense, such as color, pattern, shape, etc.
         - If there is anything in particular about the product that stands out, make sure to include it in the additional details. Keep the description short and simple, like a category and not a description.
+        - Be very convervative in generating categories and avoid any irrelevant or unnecessary details.
+        - Ensure that the categories are general and applicable to a wide range of products.
+        - Ensure that you pay attention to the colur and pattern of the product.
+        - Do not generate duplicate categories.
         
     
 
@@ -328,7 +340,7 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
                 imageb64 = encodedimage(imagePath)
             else:
                 imageb64 = imgb64
-            
+
             data = {
                 "model": modelname,
                 "prompt": prompt,
