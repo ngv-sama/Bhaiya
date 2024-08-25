@@ -62,6 +62,7 @@ def sentence_vector(sentence):
                 print(f"Error in generating embedding: {e}")
     return np.mean(embeddings,axis=0)
 
+
 def compute_similarity(text1, text2):
     vec1 = sentence_vector(text1)
     vec2 = sentence_vector(text2)
@@ -73,7 +74,7 @@ def compute_similarity(text1, text2):
         pass
     return res
 
-def weighted_average_similarity(main_similarity, sub_similarity,additional_similarity, main_weight=0.2, sub_weight=0.4, additional_weight=0.4):
+def weighted_average_similarity(main_similarity, sub_similarity,additional_similarity, main_weight=0.15, sub_weight=0.15, additional_weight=0.7):
     assert main_weight + sub_weight + additional_weight == 1, "Weights should sum to 1"
 
     return main_weight * main_similarity + sub_weight * sub_similarity + additional_weight * additional_similarity

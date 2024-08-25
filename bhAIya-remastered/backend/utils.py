@@ -299,6 +299,7 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
             pass
     try:
         res = json.loads(res)
+        
     except Exception as e:
         print("Exception occurred while parsing the response: ", e)
         res = None
