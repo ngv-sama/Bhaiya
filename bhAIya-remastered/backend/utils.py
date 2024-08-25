@@ -146,7 +146,7 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
         - Consider various interpretations of the query to provide a comprehensive set of categories.
         - Be very convervative in generating categories and avoid any irrelevant or unnecessary details.
         - Ensure that the categories are general and applicable to a wide range of products.
-        - Ensure that you pay attention to the colur and pattern of the product.
+        - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
 
         The response format should be:
@@ -235,7 +235,7 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
         - If there is anything in particular about the product that stands out, make sure to include it in the additional details.
         - Be very convervative in generating categories and avoid any irrelevant or unnecessary details.
         - Ensure that the categories are general and applicable to a wide range of products.
-        - Ensure that you pay attention to the colur and pattern of the product.
+        - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
 
         The response format should be:
@@ -329,11 +329,9 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
         - If there is anything in particular about the product that stands out, make sure to include it in the additional details. Keep the description short and simple, like a category and not a description.
         - Be very convervative in generating categories and avoid any irrelevant or unnecessary details.
         - Ensure that the categories are general and applicable to a wide range of products.
-        - Ensure that you pay attention to the colur and pattern of the product.
+        - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
         
-    
-
         The response format should be:
         {{
             "categories": [{{
