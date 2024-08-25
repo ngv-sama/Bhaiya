@@ -14,12 +14,34 @@ redis_client=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT
 
 load_dotenv()
 
+
+def adjust_weights(data, main_weight=0.15, sub_weight=0.15, additional_weight=0.7):
+    weights = [main_weight, sub_weight, additional_weight]
+    categories = ["Main category", "Sub categories", "Additional details"]
+
+    # Redistribute weights for empty categories
+    for i, category in enumerate(categories):
+        if data[category] == []:
+            weights[(i + 1) % 3] += weights[i] / 2
+            weights[(i + 2) % 3] += weights[i] / 2
+            weights[i] = 0
+
+    # Normalize weights to ensure they sum to 1
+    total = sum(weights)
+    if total > 0:
+        weights = [w / total for w in weights]
+    else:
+        # If all weights are 0, distribute evenly
+        weights = [1 / 3, 1 / 3, 1 / 3]
+
+    return weights[0], weights[1], weights[2]
+
 def update_embedding_cache(key,embedding):
     embedding=embedding
     try:
-        embedding=pickle.dumps(embedding)
+        embedding=np.array(embedding).tobytes()
         redis_client.set(key.lower(),embedding)
-        print("Embedding cache updated")
+        # print("Embedding cache updated")
     except Exception as e:
         print(f"Error in updating embedding cache: {e}")
         pass
@@ -27,11 +49,11 @@ def update_embedding_cache(key,embedding):
 
 def get_embedding_cache(key):
     key=key.lower()
-    res=None
+    res=np.array([])
     if(redis_client.exists(key)):
         res=redis_client.get(key)
-        print("fetching from cache")
-        res=pickle.loads(res)
+        # print("fetching from cache")
+        res=np.frombuffer(res,dtype=np.float64)
     return res
 
 
@@ -39,23 +61,30 @@ def sentence_vector(sentence):
     embedding_json=None
     embeddings=[]
     for word in sentence:
+        word=word.lower()
         res=get_embedding_cache(word)
-        if(res!=None):
+        if(res.size!=0):
             embeddings.append(res)
         else:
             try:
+                # print(word)
                 embedding_json = curl_request_embed(
                     f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",
-                    data={"model": os.getenv("EMBEDDING_MODEL"), "input": word}
+                    data={"model": os.getenv("EMBEDDING_MODEL"), "input": [word]}
                 )
-                embeds=embedding_json["embeddings"][0]
+                try:
+                    embeds=embedding_json["embeddings"][0]
+                except Exception as e:
+                    print(f"list not there: {e}")
+                    embeds=np.zeros(384)
+                    print(embedding_json)
+                    sys.exit()
                 if(embeds!=np.nan):
                     embeddings.append(embeds)
                 else:
                     print("ISNAN")
                     print(word)
-                    sys.exit()
-                    embeds = np.zeros(1024)
+                    embeds = np.zeros(384)
                     embeddings.append(embeds)
                 update_embedding_cache(word, embeds)
             except Exception as e:
@@ -64,9 +93,11 @@ def sentence_vector(sentence):
 
 
 def compute_similarity(text1, text2):
+    res = 0
+    if(text1==[] or text2==[]):
+        return res
     vec1 = sentence_vector(text1)
     vec2 = sentence_vector(text2)
-    res=0
     try:
         res=cosine_similarity(vec1.reshape(1,-1), vec2.reshape(1,-1))[0][0]
     except Exception as e:
@@ -74,16 +105,12 @@ def compute_similarity(text1, text2):
         pass
     return res
 
-def weighted_average_similarity(main_similarity, sub_similarity,additional_similarity, main_weight=0.15, sub_weight=0.15, additional_weight=0.7):
+def weighted_average_similarity(main_similarity, sub_similarity,additional_similarity, main_weight=0.2, sub_weight=0.2, additional_weight=0.6):
     assert main_weight + sub_weight + additional_weight == 1, "Weights should sum to 1"
 
     return main_weight * main_similarity + sub_weight * sub_similarity + additional_weight * additional_similarity
 
 def find_top_k_similar(match_data, data_list, top_k=3):
-    # Word2Vec model
-    sentences = [item["Main category"] + item["Sub categories"]+ item["Additional details"] for item in data_list]
-    # model = train_word2vec_model(sentences)
-
     match_main = match_data["Main category"]
     match_sub = match_data["Sub categories"]
     match_additional = match_data["Additional details"]
@@ -91,13 +118,14 @@ def find_top_k_similar(match_data, data_list, top_k=3):
     similarities = []
 
     for data in data_list:
+        main_weight, sub_weight, additional_weight = adjust_weights(data)
         main_similarity = compute_similarity(match_main, data["Main category"])
         sub_similarity = compute_similarity(match_sub, data["Sub categories"])
         additional_similarity = compute_similarity(
             match_additional, data["Additional details"]
         )
         weighted_similarity = weighted_average_similarity(
-            main_similarity, sub_similarity, additional_similarity
+            main_similarity, sub_similarity, additional_similarity,main_weight=main_weight,sub_weight=sub_weight,additional_weight=additional_weight
         )
         similarities.append((weighted_similarity, data))
 
