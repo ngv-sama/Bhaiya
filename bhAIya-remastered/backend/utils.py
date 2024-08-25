@@ -14,6 +14,21 @@ load_dotenv()
 BASEURL = os.getenv("BASEURL")
 HUGGINGFACETOKEN = os.getenv("HUGGINGFACETOKEN")
 
+def curl_request_embed(url, data):
+    postfields = json.dumps(data)
+    c = pycurl.Curl()
+    c.setopt(c.URL, url)
+    c.setopt(c.POST, 1)
+    c.setopt(c.POSTFIELDS, postfields)
+    c.setopt(c.HTTPHEADER, ["Content-Type: application/json"])
+    response_buffer = BytesIO()
+    c.setopt(c.WRITEDATA, response_buffer)
+    c.perform()
+    c.close()
+    response = response_buffer.getvalue().decode("utf-8")
+    response_dict = json.loads(response)
+    return response_dict
+
 def encodedimage(imgPath):
     try:
         with open(imgPath, "rb") as imgFile:

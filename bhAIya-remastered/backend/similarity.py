@@ -5,7 +5,7 @@ from Levenshtein import distance
 import sys
 import requests
 from dotenv import load_dotenv
-from utils import perform_request
+from utils import curl_request_embed
 import os
 import redis
 import pickle
@@ -36,10 +36,6 @@ def get_embedding_cache(key):
 
 
 def sentence_vector(sentence):
-    # words = [word for word in sentence if word in model.wv]
-    # if not words:
-    #     return np.zeros(model.vector_size)
-    # return np.mean(model.wv[words], axis=0)
     embedding_json=None
     embeddings=[]
     for word in sentence:
@@ -48,7 +44,10 @@ def sentence_vector(sentence):
             embeddings.append(res)
         else:
             try:
-                embedding_json=requests.post(f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",json={"model":os.getenv("EMBEDDING_MODEL"),"input":word}).json()
+                embedding_json = curl_request_embed(
+                    f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",
+                    data={"model": os.getenv("EMBEDDING_MODEL"), "input": word}
+                )
                 embeds=embedding_json["embeddings"][0]
                 if(embeds!=np.nan):
                     embeddings.append(embeds)
@@ -66,10 +65,6 @@ def sentence_vector(sentence):
 def compute_similarity(text1, text2):
     vec1 = sentence_vector(text1)
     vec2 = sentence_vector(text2)
-    # print(vec1)
-    # print(vec2)
-    # sys.exit()
-    # return cosine_similarity([vec1], [vec2])[0][0]
     res=0
     try:
         res=cosine_similarity(vec1.reshape(1,-1), vec2.reshape(1,-1))[0][0]
