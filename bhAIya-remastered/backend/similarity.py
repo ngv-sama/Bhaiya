@@ -16,19 +16,19 @@ redis_client=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT
 load_dotenv()
 print(os.getenv("EMBEDDING_MODEL"))
 
-def adjust_weights(data, main_weight=0.15, sub_weight=0.15, additional_weight=0.7):
-    weights = [main_weight, sub_weight, additional_weight]
-    categories = ["Main category", "Sub categories", "Additional details"]
+def adjust_weights(data, main_weight=0.1, sub_weight=0.25, additional_weight=0.65):
+    weights = np.array([main_weight, sub_weight, additional_weight])
+    categories = np.array(["Main category", "Sub categories", "Additional details"])
 
     # Redistribute weights for empty categories
     for i, category in enumerate(categories):
-        if data[category] == []:
+        if data[category]==[]:
             weights[(i + 1) % 3] += weights[i] / 2
             weights[(i + 2) % 3] += weights[i] / 2
             weights[i] = 0
 
     # Normalize weights to ensure they sum to 1
-    total = sum(weights)
+    total = np.sum(weights)
     if total > 0:
         weights = [w / total for w in weights]
     else:
@@ -68,7 +68,6 @@ def sentence_vector(sentence):
             embeddings.append(res)
         else:
             try:
-                # print(word)
                 embedding_json = curl_request_embed(
                     f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",
                     data={"model": os.getenv("EMBEDDING_MODEL"), "input": [word], "keep_alive": -1}
@@ -77,15 +76,15 @@ def sentence_vector(sentence):
                     embeds=embedding_json["embeddings"][0]
                 except Exception as e:
                     print(f"list not there: {e}")
-                    embeds=np.zeros(384)
+                    # embeds=np.zeros(384)
+                    embeds=np.zeros(1024)
                     print(embedding_json)
                     sys.exit()
                 if(embeds!=np.nan):
                     embeddings.append(embeds)
                 else:
-                    print("ISNAN")
-                    print(word)
-                    embeds = np.zeros(384)
+                    # embeds = np.zeros(384)
+                    embeds = np.zeros(1024)
                     embeddings.append(embeds)
                 update_embedding_cache(word, embeds)
             except Exception as e:
@@ -106,7 +105,7 @@ def compute_similarity(text1, text2):
         pass
     return res
 
-def weighted_average_similarity(main_similarity, sub_similarity,additional_similarity, main_weight=0.2, sub_weight=0.2, additional_weight=0.6):
+def weighted_average_similarity(main_similarity, sub_similarity,additional_similarity, main_weight=0.1, sub_weight=0.25, additional_weight=0.65):
     assert main_weight + sub_weight + additional_weight == 1, "Weights should sum to 1"
 
     return main_weight * main_similarity + sub_weight * sub_similarity + additional_weight * additional_similarity
@@ -116,7 +115,9 @@ def find_top_k_similar(match_data, data_list, top_k=3):
     match_sub = match_data["Sub categories"]
     match_additional = match_data["Additional details"]
 
-    similarities = []
+    # similarities = np.array([])
+    similarities=[]
+    min_similarity=np.inf
 
     pbar = tqdm(total=len(data_list), desc="Finding similar items", position=0, leave=True)
     for data in data_list:
@@ -129,15 +130,28 @@ def find_top_k_similar(match_data, data_list, top_k=3):
         weighted_similarity = weighted_average_similarity(
             main_similarity, sub_similarity, additional_similarity,main_weight=main_weight,sub_weight=sub_weight,additional_weight=additional_weight
         )
-        similarities.append((weighted_similarity, data))
+        # similarities.append((weighted_similarity, data))
+        # if(similarities.size<top_k):
+        if(len(similarities)<top_k):
+            #     # similarities=np.append(similarities,np.array([weighted_similarity,data]))
+            if weighted_similarity < min_similarity:
+                min_similarity = weighted_similarity
+            similarities.append((weighted_similarity, data))
+        else:
+            if(weighted_similarity>min_similarity):
+                # print(similarities)
+                min_index=np.argmin([t[0] for t in similarities])
+                similarities[min_index]=(weighted_similarity,data)
+                min_similarity = min([t[0] for t in similarities])
         pbar.update(1)
-
     # Sort by similarity in descending order and get the top K
-    similarities.sort(reverse=True, key=lambda x: x[0])
+    # similarities.sort(reverse=True, key=lambda x: x[0])
     # print(similarities)
 
     # return [item[1] for item in similarities[:top_k]]
-    return similarities[:top_k]
+    # return similarities[:top_k]
+    print(similarities)
+    return similarities
 
 
 if __name__ == "__main__":
@@ -161,3 +175,4 @@ if __name__ == "__main__":
     # # Find top 3 similar items
     # top_k_similar = find_top_k_similar(match_data, data_list, top_k=2)
     # print("\n\n",top_k_similar)
+    print("Done running similarity.py")
