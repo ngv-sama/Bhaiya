@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
             username.textContent = data.username;
             email.textContent = data.email;
             if (conversations[currentConversationId].length === 0) {
-                addMessage(`Hello, ${username.textContent}! I am bhAIya, your friendly neighbourhood shopkeeper. How can I help you today?`, 'received');
+                addMessage(`Hello, ${username.textContent}! I am bhAIya, your neighbourhood shopkeeper. How can I help?`, 'received');
             }
         })
         .catch(error => {
