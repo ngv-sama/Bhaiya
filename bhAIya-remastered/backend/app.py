@@ -18,12 +18,15 @@ mongoDatabase=MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 # DATABASE_NAME="database"
 # DATABASE_NAME="database_500"
 # DATABASE_NAME="amazon_database"
-DATABASE_NAME="only_clothes"
+# DATABASE_NAME="only_clothes"
+DATABASE_NAME="merged_text_3.6"
 
 # IMAGES_DATABASE= "imageDatabase"
 # IMAGES_DATABASE= "imageDatabase_500"
 # IMAGES_DATABASE = "amazon_images"
-IMAGES_DATABASE = "only_clothes_images"
+# IMAGES_DATABASE = "only_clothes_images"
+IMAGES_DATABASE = "merged_images_3.6"
+
 
 
 try:
