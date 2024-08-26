@@ -37,7 +37,7 @@ firebase_admin.initialize_app(cred)
 #     }
 #     if image:
 #         data["images"] = [image]
-    
+
 #     response = requests.post(url, json=data)
 #     if response.status_code == 200:
 #         return response.json()["response"]
@@ -319,4 +319,5 @@ def generate_image_description():
 
 
 if __name__ == '__main__':
+    # app.run(debug=True,port=5002)
     app.run(debug=True)
