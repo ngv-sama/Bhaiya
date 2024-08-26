@@ -175,4 +175,4 @@ if __name__ == "__main__":
     # # Find top 3 similar items
     # top_k_similar = find_top_k_similar(match_data, data_list, top_k=2)
     # print("\n\n",top_k_similar)
-    print("Done running similarity.py")
+    # print("Done running similarity.py")
