@@ -40,7 +40,10 @@
                         <div id="image-preview"></div> -->
                 </div>
                 <input type="text" id="user-input" name="description" placeholder="What are you looking for today?" autocomplete="off">
-                <button type="submit">Send</button>
+                <!-- <button type="submit">Send</button> -->
+                <button class="submit" type="submit">
+                    <img src="{{ url_for('static', filename='arrow.png') }}" alt="Arrow icon" width="30" height="30">
+                </button>
             </div>
         </form>
         </div>
@@ -63,6 +66,7 @@
             </div>
             
             <div class="options">
+                <a href="{{ url_for('checkout') }}" class="checkout-button" style="text-decoration: none;">Cart</a>
                 <a href="{{ url_for('login') }}" class="logout-button" style="text-decoration: none;">Log Out</a>
             </div>
         

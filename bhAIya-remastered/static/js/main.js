@@ -270,14 +270,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function openDrawer() {
         sideDrawer.classList.add('open');
+        document.getElementById('chat-messages').classList.add('shifted_messages');
+        document.querySelector('.chat-input').classList.add('shifted_input');
     }
     
     function closeDrawer() {
         sideDrawer.classList.remove('open');
+        document.getElementById('chat-messages').classList.remove('shifted_messages');
+        document.querySelector('.chat-input').classList.remove('shifted_input');
     }
     
     function toggleDrawer() {
         sideDrawer.classList.toggle('open');
+        document.getElementById('chat-messages').classList.toggle('shifted_messages');
+        document.querySelector('.chat-input').classList.toggle('shifted_input');
     }
     
     drawerHandle.addEventListener('mousedown', startLongPress);

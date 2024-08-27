@@ -139,7 +139,7 @@
 }
 
 .history{
-    flex: 1;
+    flex: 0.75;
     overflow-y: scroll;
 } 
 
@@ -168,4 +168,22 @@
 
 .logout-button:hover {
     background-color: rgba(255, 0, 0, 0.1);
+}
+
+.checkout-button {
+    background-color: transparent;
+    color: #03c13270;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 90%;
+    text-align: center;
+    font-weight: 600;
+}
+
+.checkout-button:hover {
+    background-color: rgba(7, 218, 87, 0.1);
 }
