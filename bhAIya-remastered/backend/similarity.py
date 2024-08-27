@@ -134,11 +134,11 @@ def find_top_k_similar(match_data, data_list, top_k=3):
         # if(similarities.size<top_k):
         if(len(similarities)<top_k):
             #     # similarities=np.append(similarities,np.array([weighted_similarity,data]))
-            if weighted_similarity < min_similarity:
+            if weighted_similarity <= min_similarity:
                 min_similarity = weighted_similarity
             similarities.append((weighted_similarity, data))
         else:
-            if(weighted_similarity>min_similarity):
+            if(weighted_similarity>=min_similarity):
                 # print(similarities)
                 min_index=np.argmin([t[0] for t in similarities])
                 similarities[min_index]=(weighted_similarity,data)
