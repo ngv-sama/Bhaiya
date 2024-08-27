@@ -9,7 +9,7 @@ import redis
 redis_client=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"),db=1)
 
 load_dotenv()
-
+print(os.getenv("EMBEDDING_MODEL"))
 
 def adjust_weights(data, main_weight=0.1, sub_weight=0.25, additional_weight=0.65):
     weights = np.array([main_weight, sub_weight, additional_weight])
@@ -65,7 +65,7 @@ def sentence_vector(sentence):
             try:
                 embedding_json = curl_request_embed(
                     f"{os.getenv('OLLAMA_URL_SERVER')}/api/embed",
-                    data={"model": os.getenv("EMBEDDING_MODEL"), "input": [word]}
+                    data={"model": os.getenv("EMBEDDING_MODEL"), "input": [word], "keep_alive": -1}
                 )
                 try:
                     embeds=embedding_json["embeddings"][0]
@@ -128,11 +128,11 @@ def find_top_k_similar(match_data, data_list, top_k=3):
         # if(similarities.size<top_k):
         if(len(similarities)<top_k):
             #     # similarities=np.append(similarities,np.array([weighted_similarity,data]))
-            if weighted_similarity < min_similarity:
+            if weighted_similarity <= min_similarity:
                 min_similarity = weighted_similarity
             similarities.append((weighted_similarity, data))
         else:
-            if(weighted_similarity>min_similarity):
+            if(weighted_similarity>=min_similarity):
                 # print(similarities)
                 min_index=np.argmin([t[0] for t in similarities],axis=0)
                 similarities[min_index]=(weighted_similarity,data)
@@ -149,22 +149,24 @@ def find_top_k_similar(match_data, data_list, top_k=3):
 
 
 if __name__ == "__main__":
+    print("Running similarity.py")
 
-    # Sample data
-    data_list = [
-        {"id":452,"Main category": ["banana", "cherry", "date"], "Sub categories": ["elephant", "frog", "goat"],"Additional details": ["Summer", "red", "fruit", "Party"] },
-        {"id":532,"Main category": ["sports", "clothes", "football"], "Sub categories": ["blue", "shirt", "large"],"Additional details": ["Summer 2012.0", "Blue", "Casual", "Party"]},
-        {"id":876,"Main category": ["blue", "shirt", "large"], "Sub categories":["Summer 2012.0", "Blue", "Casual", "Party"],"Additional details": ["sports", "clothes", "football"] },
-        {"id":457,"Main category": ["cherry", "date", "fig"], "Sub categories": ["frog", "goat", "horse"],"Additional details": ["winter", "brown"]},
-        {"id":435,"Main category": ["apple", "blueberry", "cherry"], "Sub categories": ["ant", "bat", "cat"],"Additional details": ["Summer", "cherry", "fruit", "home"]},
-    ]
+    # # Sample data
+    # data_list = [
+    #     {"id":452,"Main category": ["banana", "cherry", "date"], "Sub categories": ["elephant", "frog", "goat"],"Additional details": ["Summer", "red", "fruit", "Party"] },
+    #     {"id":532,"Main category": ["sports", "clothes", "football"], "Sub categories": ["blue", "shirt", "large"],"Additional details": ["Summer 2012.0", "Blue", "Casual", "Party"]},
+    #     {"id":876,"Main category": ["blue", "shirt", "large"], "Sub categories":["Summer 2012.0", "Blue", "Casual", "Party"],"Additional details": ["sports", "clothes", "football"] },
+    #     {"id":457,"Main category": ["cherry", "date", "fig"], "Sub categories": ["frog", "goat", "horse"],"Additional details": ["winter", "brown"]},
+    #     {"id":435,"Main category": ["apple", "blueberry", "cherry"], "Sub categories": ["ant", "bat", "cat"],"Additional details": ["Summer", "cherry", "fruit", "home"]},
+    # ]
 
 
-    # match_data = {"Main category": ["apple", "banana", "cherry"], "Sub categories": ["dog", "elephant", "frog"]}
-    match_data = {"Main category": ["clothes", "t-shirt","Mens fashion"], "Sub categories": ["deep blue", "big"], "Additional details": ["sports","cricket"]}
+    # # match_data = {"Main category": ["apple", "banana", "cherry"], "Sub categories": ["dog", "elephant", "frog"]}
+    # match_data = {"Main category": ["clothes", "t-shirt","Mens fashion"], "Sub categories": ["deep blue", "big"], "Additional details": ["sports","cricket"]}
 
-    # Prepare sentences for training the Word2Vec model
+    # # Prepare sentences for training the Word2Vec model
 
-    # Find top 3 similar items
-    top_k_similar = find_top_k_similar(match_data, data_list, top_k=2)
-    print("\n\n",top_k_similar)
+    # # Find top 3 similar items
+    # top_k_similar = find_top_k_similar(match_data, data_list, top_k=2)
+    # print("\n\n",top_k_similar)
+    # print("Done running similarity.py")

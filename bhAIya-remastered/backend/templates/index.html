@@ -4,41 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>bhAIya: Your AI Shopping Assistant</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/chat.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/drawer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/responsive.css') }}">
 </head>
 <body>
     <div class="chat-container">
         <header>
-            <a href="{{ url_for('login') }}" class="ios-button" style="text-decoration: none;">Log Out</a>
-            <h1>bhAIya</h1>
+            
             <button id="new-chat-button" class="ios-button">New Chat</button>
+            <h1>bhAIya</h1>
+            <a href="{{ url_for('login') }}" class="ios-button" style="text-decoration: none;">Log Out</a>
+            
+            
         </header>
         <div class="chat-messages" id="chat-messages">
             <div class="message received">
                 <p>Hello! I'm bhAIya, your AI shopping assistant. How can I help you today?</p>
             </div>
         </div>
+        <div class="chat-input">
         <form id="chat-form" enctype="multipart/form-data">
             <div class="input-container">
                 <div class="image-preview-container">
                     <input type="file" id="image-upload" name="image" accept="image/*">
                     <label for="image-upload" class="upload-btn">📷</label>
                     <div id="image-preview"></div>
+                    <!-- <input type="file" id="image-upload" name="image" accept="image/*" style="display: none;">
+                        <label for="image-upload" class="upload-btn">
+                            <img src="{{ url_for('static', filename='joede--cam-icon.png') }}" alt="Camera icon" style="width: 24px; height: auto;">
+                        </label>
+                        <div id="image-preview"></div> -->
                 </div>
-                <input type="text" id="user-input" name="description" placeholder="Type a message..." autocomplete="off">
-                <button type="submit">Send</button>
+                <input type="text" id="user-input" name="description" placeholder="What are you looking for today?" autocomplete="off">
+                <!-- <button type="submit">Send</button> -->
+                <button class="submit" type="submit">
+                    <img src="{{ url_for('static', filename='arrow.png') }}" alt="Arrow icon" width="30" height="30">
+                </button>
             </div>
         </form>
+        </div>
     <div class="side-drawer" id="sideDrawer">
         <div class="drawer-handle" id="drawerHandle">
             <div class="handle-bar"></div>
         </div>
         <div class="drawer-content">
-            <h2>Welcome</h2>
-            <p>Username: <span id="username"></span></p>
-            <p>Email: <span id="user-email"></span></p>
-            <h3>Recent Searches</h3>
-            <ul id="chat-history-list" class="conversation-list"></ul>
+            
+            
+            <div class="profile">
+                <h2>Welcome</h2>
+                <p>Username: <span id="username"></span></p>
+                <p>Email: <span id="user-email"></span></p>
+                <h4>Recent </h4>
+            </div>
+            
+            <div class="history">
+                <ul id="chat-history-list" class="conversation-list"></ul>
+            </div>
+            
+            <div class="options">
+                <a href="{{ url_for('checkout') }}" class="checkout-button" style="text-decoration: none;">Cart</a>
+                <a href="{{ url_for('login') }}" class="logout-button" style="text-decoration: none;">Log Out</a>
+            </div>
+        
         </div>
     </div>
     </div>

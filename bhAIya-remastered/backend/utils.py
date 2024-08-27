@@ -157,6 +157,7 @@ def getCategoriesFromQuery(
         - Ensure that the categories are general and applicable to a wide range of products.
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
+        - Differentiate between main categories, subcategories, and additional details.
 
         The response format should be:
         {{
@@ -252,6 +253,7 @@ def getCategoriesFromText(
         - Ensure that the categories are general and applicable to a wide range of products.
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
+        - Differentiate between main categories, subcategories, and additional details.
 
         The response format should be:
         {{
@@ -353,6 +355,7 @@ def getcategoriesFromImage(
         - Ensure that the categories are general and applicable to a wide range of products.
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
+        - Differentiate between main categories, subcategories, and additional details.
         
         The response format should be:
         {{

@@ -183,6 +183,12 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dash.html')
 
+@app.route('/cart')
+def checkout():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('cart.html')
+
 @app.route('/get_recommendations', methods=['POST'])
 def get_recommendations():
     if not session.get('logged_in'):
