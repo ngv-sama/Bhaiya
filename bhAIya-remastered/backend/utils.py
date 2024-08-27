@@ -14,6 +14,7 @@ load_dotenv()
 BASEURL = os.getenv("BASEURL")
 HUGGINGFACETOKEN = os.getenv("HUGGINGFACETOKEN")
 
+
 def curl_request_embed(url, data):
     postfields = json.dumps(data)
     c = pycurl.Curl()
@@ -29,6 +30,7 @@ def curl_request_embed(url, data):
     response_dict = json.loads(response)
     return response_dict
 
+
 def encodedimage(imgPath):
     try:
         with open(imgPath, "rb") as imgFile:
@@ -37,28 +39,31 @@ def encodedimage(imgPath):
         print(f"An error occurred while encoding the image: {e}")
         return None
 
+
 def getImage(imgDatabase, id):
     for item in imgDatabase:
         if item["id"] == id:
             return item["image"]
     return ""
 
+
 import json
+
 
 def accumulate_response(response):
     res = ""
-    
+
     # Check if response is a string
     if isinstance(response, str):
-        lines = response.split('\n')
+        lines = response.split("\n")
     else:
         # Assume it's an iterable (like requests.Response)
         lines = response.iter_lines()
 
     for line in lines:
         if isinstance(line, bytes):
-            line = line.decode('utf-8')
-        
+            line = line.decode("utf-8")
+
         if line.strip():
             try:
                 chunk = json.loads(line)
@@ -70,8 +75,8 @@ def accumulate_response(response):
                     break
             except json.JSONDecodeError:
                 # If it's not valid JSON, just add the line to the result
-                res += line + '\n'
-                print(line, end='', flush=True)
+                res += line + "\n"
+                print(line, end="", flush=True)
 
     return res
 
@@ -82,12 +87,12 @@ def perform_curl_request(url, data, stream=False):
     c.setopt(c.URL, url)
     c.setopt(c.POST, 1)
     c.setopt(c.POSTFIELDS, json.dumps(data))
-    c.setopt(c.HTTPHEADER, ['Content-Type: application/json'])
-    
+    c.setopt(c.HTTPHEADER, ["Content-Type: application/json"])
+
     accumulated = []
 
     def write_callback(data):
-        decoded_data = data.decode('utf-8')
+        decoded_data = data.decode("utf-8")
         buffer.write(data)
         if stream:
             try:
@@ -108,19 +113,23 @@ def perform_curl_request(url, data, stream=False):
         c.close()
 
     if stream:
-        return ''.join(accumulated)
+        return "".join(accumulated)
     else:
-        return accumulate_response(buffer.getvalue().decode('utf-8'))
+        return accumulate_response(buffer.getvalue().decode("utf-8"))
+
 
 def perform_request(url, data, stream=False, use_pycurl=True, session=None):
     if use_pycurl:
         return perform_curl_request(url, data, stream)
     else:
         request_func = session.post if session else requests.post
-        response=request_func(url, json=data, stream=stream)
+        response = request_func(url, json=data, stream=stream)
         return accumulate_response(response)
 
-def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycurl=True):
+
+def getCategoriesFromQuery(
+    modelname, query, ollama=True, session=None, use_pycurl=True
+):
     prompt = f"""
     [INST]
         Your task is to generate relevant product categories based on the user's search query: "{query}". Generate categories that would be suitable for products matching this query. Provide the output in JSON format, following these guidelines strictly:
@@ -181,11 +190,15 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
                 "model": modelname,
                 "prompt": prompt,
                 "format": "json",
-                "options": {
-                    "temperature": 0.2
-                },
+                "options": {"temperature": 0.2},
             }
-            res = perform_request(f"{BASEURL}/api/generate", data, stream=False, use_pycurl=use_pycurl, session=session)
+            res = perform_request(
+                f"{BASEURL}/api/generate",
+                data,
+                stream=False,
+                use_pycurl=use_pycurl,
+                session=session,
+            )
         except Exception as e:
             print(f"An error occurred with ollama using text: {e}")
     else:
@@ -208,7 +221,9 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
     return res
 
 
-def getCategoriesFromText(modelname, description, ollama=True, session=None, use_pycurl=True):
+def getCategoriesFromText(
+    modelname, description, ollama=True, session=None, use_pycurl=True
+):
     prompt = f"""
     [INST]
         Your primary task is to assign categories to the product description {description}. The product description may or may not make sense grammatically your job is to extract the categories keeping these points in mind. Give the output in JSON format. Follow these JSON structure guidelines strictly and provide the response in JSON only, without any explanatory text.
@@ -279,11 +294,15 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
             data = {
                 "model": modelname,
                 "prompt": prompt,
-                "options": {
-                    "temperature": 0.2
-                },
+                "options": {"temperature": 0.2},
             }
-            res = perform_request(f"{BASEURL}/api/generate", data, stream=False, use_pycurl=use_pycurl, session=session)
+            res = perform_request(
+                f"{BASEURL}/api/generate",
+                data,
+                stream=False,
+                use_pycurl=use_pycurl,
+                session=session,
+            )
         except Exception as e:
             print(f"An error occurred with ollama using text: {e}")
     else:
@@ -299,13 +318,16 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
             pass
     try:
         res = json.loads(res)
-        
+
     except Exception as e:
         print("Exception occurred while parsing the response: ", e)
         res = None
     return res
 
-def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, session=None, use_pycurl=True):
+
+def getcategoriesFromImage(
+    modelname, imagePath, imgb64=None, ollama=True, session=None, use_pycurl=True
+):
     prompt = f"""
     <|system|>
         Your primary task is to extract categories from the product's image. Your job is to extract the categories keeping these points in mind. Give the output in JSON format.Follow these JSON structure guidelines strictly and provide the response in JSON only, without any explanatory text.
@@ -362,7 +384,13 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
                 "keep_alive": "10m",
                 "options": {"temperature": 0.2},
             }
-            res = perform_request(f"{BASEURL}/api/generate", data, stream=False, use_pycurl=use_pycurl, session=session)
+            res = perform_request(
+                f"{BASEURL}/api/generate",
+                data,
+                stream=False,
+                use_pycurl=use_pycurl,
+                session=session,
+            )
             print("response received from ollama")
         except Exception as e:
             print(f"An error occurred with ollama using image: {e}")
@@ -374,7 +402,23 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
     except Exception as e:
         print("Exception occurred while parsing the response: ", e)
         res = ""
-        data = {"model": modelname, "prompt": "Describe the image in a few words", "images": [imageb64]}
-        res = perform_request(f"{BASEURL}/api/generate", data, stream=True, use_pycurl=use_pycurl, session=session)
-        res = getCategoriesFromText("mistral", res, ollama=True, session=session, use_pycurl=use_pycurl)
+        data = {
+            "model": modelname,
+            "prompt": "Describe the image in a few words",
+            "images": [imageb64],
+        }
+        res = perform_request(
+            f"{BASEURL}/api/generate",
+            data,
+            stream=True,
+            use_pycurl=use_pycurl,
+            session=session,
+        )
+        res = getCategoriesFromText(
+            "mistral:7b-instruct-v0.3-q4_1",
+            res,
+            ollama=True,
+            session=session,
+            use_pycurl=use_pycurl,
+        )
     return res

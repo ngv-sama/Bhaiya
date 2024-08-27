@@ -337,7 +337,7 @@
 #     submit_button = st.form_submit_button(label="Add Item")
 
 #     if submit_button:
-#         new_item = getCategoriesFromText("mistral",new_prod_description,ollama=True)["categories"][0]
+#         new_item = getCategoriesFromText("mistral:7b-instruct-v0.3-q4_1",new_prod_description,ollama=True)["categories"][0]
 #         new_item["id"] = int(new_id)
 #         new_item["price"] = float(new_price)
 #         print(new_item)
@@ -604,19 +604,18 @@ with st.sidebar.form(key="add_item_form"):
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
             encoded_image = encode_image(image)
-            collection_i.insert_one({"id": new_id
-                                     , "image": encoded_image})
+            collection_i.insert_one({"id": new_id, "image": encoded_image})
             image_categories = getcategoriesFromImage(
-                "mistral", encoded_image, ollama=True
+                "mistral:7b-instruct-v0.3-q4_1", encoded_image, ollama=True
             )["categories"][0]
 
         text_categories = getCategoriesFromText(
-            "mistral", new_prod_description, ollama=True
+            "mistral:7b-instruct-v0.3-q4_1", new_prod_description, ollama=True
         )["categories"][0]
 
         # Combine categories from image and text
         new_item = {}
-        if(image_categories is not None):
+        if image_categories is not None:
             for key in text_categories.keys():
                 new_item[key] = list(set(text_categories[key] + image_categories[key]))
         else:

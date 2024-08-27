@@ -138,7 +138,7 @@ def find_top_k_similar(match_data, data_list, top_k=3):
         else:
             if(weighted_similarity>min_similarity):
                 # print(similarities)
-                min_index=np.argmin([t[0] for t in similarities])
+                min_index=np.argmin([t[0] for t in similarities],axis=0)
                 similarities[min_index]=(weighted_similarity,data)
                 min_similarity = min([t[0] for t in similarities])
 
