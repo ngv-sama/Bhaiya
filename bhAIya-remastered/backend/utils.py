@@ -148,6 +148,7 @@ def getCategoriesFromQuery(modelname, query, ollama=True, session=None, use_pycu
         - Ensure that the categories are general and applicable to a wide range of products.
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
+        - Differentiate between main categories, subcategories, and additional details.
 
         The response format should be:
         {{
@@ -237,6 +238,7 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
         - Ensure that the categories are general and applicable to a wide range of products.
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
+        - Differentiate between main categories, subcategories, and additional details.
 
         The response format should be:
         {{
@@ -299,7 +301,7 @@ def getCategoriesFromText(modelname, description, ollama=True, session=None, use
             pass
     try:
         res = json.loads(res)
-        
+
     except Exception as e:
         print("Exception occurred while parsing the response: ", e)
         res = None
@@ -331,6 +333,7 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
         - Ensure that the categories are general and applicable to a wide range of products.
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
+        - Differentiate between main categories, subcategories, and additional details.
         
         The response format should be:
         {{
