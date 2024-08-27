@@ -337,7 +337,7 @@
 #     submit_button = st.form_submit_button(label="Add Item")
 
 #     if submit_button:
-#         new_item = getCategoriesFromText("llama3.1:8b",new_prod_description,ollama=True)["categories"][0]
+#         new_item = getCategoriesFromText("mistral:latest",new_prod_description,ollama=True)["categories"][0]
 #         new_item["id"] = int(new_id)
 #         new_item["price"] = float(new_price)
 #         print(new_item)
@@ -610,7 +610,7 @@ with st.sidebar.form(key="add_item_form"):
             )["categories"][0]
 
         text_categories = getCategoriesFromText(
-            "llama3.1:8b", new_prod_description, ollama=True
+            "mistral:latest", new_prod_description, ollama=True
         )["categories"][0]
 
         # Combine categories from image and text

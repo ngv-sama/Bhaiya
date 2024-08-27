@@ -6,7 +6,16 @@ from utils import curl_request_embed
 import os
 import redis
 
-redis_client=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"),db=1)
+redis_client_1=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"),db=1)
+redis_client_2 = redis.Redis(
+    host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=2
+)
+redis_client_3 = redis.Redis(
+    host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=3
+)
+redis_client_4 = redis.Redis(
+    host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=4
+)
 
 load_dotenv()
 
@@ -32,19 +41,22 @@ def adjust_weights(data, main_weight=0.1, sub_weight=0.25, additional_weight=0.6
 
     return weights[0], weights[1], weights[2]
 
-def update_embedding_cache(key,embedding):
+def update_embedding_cache(redis_client,key,embedding):
     embedding=embedding
+    if isinstance(key, str):
+        key = key.lower()
     try:
         embedding=np.array(embedding).tobytes()
-        redis_client.set(key.lower(),embedding)
+        redis_client.set(key,embedding)
         # print("Embedding cache updated")
     except Exception as e:
         print(f"Error in updating embedding cache: {e}")
         pass
 
 
-def get_embedding_cache(key):
-    key=key.lower()
+def get_embedding_cache(redis_client,key):
+    if(isinstance(key,str)):
+        key=key.lower()
     res=np.array([])
     if(redis_client.exists(key)):
         res=redis_client.get(key)
@@ -53,12 +65,16 @@ def get_embedding_cache(key):
     return res
 
 
-def sentence_vector(sentence):
+def sentence_vector(sentence,redis_client,id=None):
     embedding_json=None
     embeddings=[]
+    if(id!=None):
+        embedding_database=get_embedding_cache(redis_client,id)
+        if(embedding_database.size!=0):
+            return embedding_database
     for word in sentence:
         word=word.lower()
-        res=get_embedding_cache(word)
+        res=get_embedding_cache(redis_client_1,word)
         if(res.size!=0):
             embeddings.append(res)
         else:
@@ -81,18 +97,23 @@ def sentence_vector(sentence):
                     # embeds = np.zeros(384)
                     embeds = np.zeros(1024)
                     embeddings.append(embeds)
-                update_embedding_cache(word, embeds)
+                update_embedding_cache(redis_client_1,word, embeds)
             except Exception as e:
                 print(f"Error in generating embedding: {e}")
+    if(id!=None):
+        if(get_embedding_cache(redis_client,id).size==0):
+            mean = np.mean(embeddings, axis=0)
+            update_embedding_cache(redis_client,id,mean)
+            return mean
     return np.mean(embeddings,axis=0)
 
 
-def compute_similarity(text1, text2):
+def compute_similarity(text1, text2,redis_client,id=None):
     res = 0
     if(text1==[] or text2==[]):
         return res
-    vec1 = sentence_vector(text1)
-    vec2 = sentence_vector(text2)
+    vec1 = sentence_vector(text1,redis_client_1)
+    vec2 = sentence_vector(text2,redis_client,id)
     try:
         res=cosine_similarity(vec1.reshape(1,-1), vec2.reshape(1,-1))[0][0]
     except Exception as e:
@@ -116,10 +137,10 @@ def find_top_k_similar(match_data, data_list, top_k=3):
 
     for data in data_list:
         main_weight, sub_weight, additional_weight = adjust_weights(data)
-        main_similarity = compute_similarity(match_main, data["Main category"])
-        sub_similarity = compute_similarity(match_sub, data["Sub categories"])
+        main_similarity = compute_similarity(match_main, data["Main category"],redis_client_2,data["id"])
+        sub_similarity = compute_similarity(match_sub, data["Sub categories"],redis_client_3,data["id"])
         additional_similarity = compute_similarity(
-            match_additional, data["Additional details"]
+            match_additional, data["Additional details"], redis_client_4, data["id"]
         )
         weighted_similarity = weighted_average_similarity(
             main_similarity, sub_similarity, additional_similarity,main_weight=main_weight,sub_weight=sub_weight,additional_weight=additional_weight

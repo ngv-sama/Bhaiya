@@ -59,7 +59,7 @@ except Exception as e:
 # load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for session management
+app.secret_key = "your_secret_key"  # Set a secret key for session management
 
 BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
 OLLAMA_URL = os.getenv("OLLAMA_URL_SERVER")
@@ -85,115 +85,118 @@ firebase_admin.initialize_app(cred)
 #     else:
 #         raise Exception(f"Ollama request failed: {response.text}")
 
+
 def ollama_request(model, prompt, image=None):
     url = f"{OLLAMA_URL}/api/generate"
-    data = {
-        "model": model,
-        "prompt": prompt,
-        "stream": False
-    }
+    data = {"model": model, "prompt": prompt, "stream": False}
     if image:
         data["images"] = [image]
-    
+
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, url)
     c.setopt(c.WRITEDATA, buffer)
-    c.setopt(c.HTTPHEADER, ['Content-Type: application/json'])
+    c.setopt(c.HTTPHEADER, ["Content-Type: application/json"])
     c.setopt(c.POST, 1)
     c.setopt(c.POSTFIELDS, json.dumps(data))
-    
+
     try:
         c.perform()
         status_code = c.getinfo(pycurl.HTTP_CODE)
         if status_code == 200:
-            body = buffer.getvalue().decode('utf-8')
+            body = buffer.getvalue().decode("utf-8")
             return json.loads(body)["response"]
         else:
-            raise Exception(f"Ollama request failed: {buffer.getvalue().decode('utf-8')}")
+            raise Exception(
+                f"Ollama request failed: {buffer.getvalue().decode('utf-8')}"
+            )
     finally:
         c.close()
 
 
-@app.route('/')
+@app.route("/")
 def login():
-    return render_template('login.html')
+    return render_template("login.html")
 
-@app.route('/verify_token', methods=['POST'])
+
+@app.route("/verify_token", methods=["POST"])
 def verify_token():
-    id_token = request.json['idToken']
+    id_token = request.json["idToken"]
     try:
         decoded_token = auth.verify_id_token(id_token)
-        uid = decoded_token['uid']
-        email = decoded_token['email']
-        session['logged_in'] = True
-        session['user_type'] = 'user'
-        session['email'] = email
-        session['uuid'] = hashlib.sha256(email.encode()).hexdigest()
-        session['username'] = email.split('@')[0]
+        uid = decoded_token["uid"]
+        email = decoded_token["email"]
+        session["logged_in"] = True
+        session["user_type"] = "user"
+        session["email"] = email
+        session["uuid"] = hashlib.sha256(email.encode()).hexdigest()
+        session["username"] = email.split("@")[0]
         return jsonify({"success": True}), 200
     except auth.InvalidIdTokenError:
         return jsonify({"error": "Invalid token"}), 400
 
-@app.route('/login', methods=['POST'])
+
+@app.route("/login", methods=["POST"])
 def handle_login():
-    username = request.form.get('username')
-    email = request.form.get('email')
-    password = request.form.get('password')
-    user_type = request.form.get('user_type')
-    
+    username = request.form.get("username")
+    email = request.form.get("email")
+    password = request.form.get("password")
+    user_type = request.form.get("user_type")
+
     if username and password:  # Add your authentication logic here
-        session['logged_in'] = True
-        session['user_type'] = user_type
-        session['email'] = email
-        session['username'] = username
-        session['uuid'] = hashlib.sha256(username.encode()).hexdigest()
+        session["logged_in"] = True
+        session["user_type"] = user_type
+        session["email"] = email
+        session["username"] = username
+        session["uuid"] = hashlib.sha256(username.encode()).hexdigest()
         logging.info(f"User {username} logged in")
-        if user_type == 'user':
-            return redirect(url_for('index'))
+        if user_type == "user":
+            return redirect(url_for("index"))
         else:
-            return redirect('http://localhost:8501')
+            return redirect("http://localhost:8501")
     else:
-        return render_template('login.html', error="Invalid credentials")
+        return render_template("login.html", error="Invalid credentials")
 
-@app.route('/get_profile', methods=['GET'])
+
+@app.route("/get_profile", methods=["GET"])
 def get_profile():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
-    
-    return jsonify({
-        "username": session['username'],
-        "email": session['email']
-    })
 
-@app.route('/logout')
+    return jsonify({"username": session["username"], "email": session["email"]})
+
+
+@app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
-@app.route('/index')
+
+@app.route("/index")
 def index():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('index.html')
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    return render_template("index.html")
 
-@app.route('/dashboard')
+
+@app.route("/dashboard")
 def dashboard():
-    if not session.get('logged_in') or session.get('user_type') != 'admin':
-        return redirect(url_for('login'))
-    return render_template('dash.html')
+    if not session.get("logged_in") or session.get("user_type") != "admin":
+        return redirect(url_for("login"))
+    return render_template("dash.html")
 
-@app.route('/get_recommendations', methods=['POST'])
+
+@app.route("/get_recommendations", methods=["POST"])
 def get_recommendations():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
 
-    desc = request.form.get('description')
-    image = request.files.get('image')
+    desc = request.form.get("description")
+    image = request.files.get("image")
 
     data = {}
     if desc:
-        data['text'] = desc
+        data["text"] = desc
 
     print("Sending to FastAPI:", data)
 
@@ -203,7 +206,7 @@ def get_recommendations():
             buffered = io.BytesIO()
             img.save(buffered, format="PNG")
             image_data = base64.b64encode(buffered.getvalue()).decode()
-            data['img64'] = image_data
+            data["img64"] = image_data
         except Exception as e:
             print(f"Error processing image: {str(e)}")
             return jsonify({"error": f"Error processing image: {str(e)}"}), 500
@@ -218,7 +221,7 @@ def get_recommendations():
     categories = {}
     print(text)
     if text != None:
-        textCategories = getCategoriesFromQuery("llama3.1:8b", text, ollama=True)[
+        textCategories = getCategoriesFromQuery("mistral:latest", text, ollama=True)[
             "categories"
         ][0]
     if img64 != None:
@@ -238,7 +241,7 @@ def get_recommendations():
     for result in results:
         result[1]["image"] = getImage(imgDatabase, result[1]["id"])
         l.append(result[1])
-    
+
     return l
 
     # try:
@@ -257,63 +260,66 @@ def get_recommendations():
     #     print(traceback.format_exc())
     #     return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-@app.route('/item/<string:item_id>')
-def item_page(item_id):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('item.html', item_id=str(item_id))
 
-@app.route('/save_chat_history', methods=['POST'])
+@app.route("/item/<string:item_id>")
+def item_page(item_id):
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    return render_template("item.html", item_id=str(item_id))
+
+
+@app.route("/save_chat_history", methods=["POST"])
 def save_chat_history():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
 
-    user_uuid = session['uuid']
+    user_uuid = session["uuid"]
     data = request.json
 
     # Create a unique file for each user
-    user_file = f'chat_history_{user_uuid}.json'
+    user_file = f"chat_history_{user_uuid}.json"
 
     user_data = {
-        "email": session['email'],
+        "email": session["email"],
         "last_updated": datetime.now().isoformat(),
-        "conversations": data['conversations'],
-        "currentConversationId": data['currentConversationId']
+        "conversations": data["conversations"],
+        "currentConversationId": data["currentConversationId"],
     }
-    
-    with open(user_file, 'w') as f:
+
+    with open(user_file, "w") as f:
         json.dump(user_data, f)
-    
+
     return jsonify({"message": "Chat history saved successfully"}), 200
 
-@app.route('/get_chat_history', methods=['GET'])
+
+@app.route("/get_chat_history", methods=["GET"])
 def get_chat_history():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
 
-    user_uuid = session['uuid']
-    user_file = f'chat_history_{user_uuid}.json'
+    user_uuid = session["uuid"]
+    user_file = f"chat_history_{user_uuid}.json"
 
     if os.path.exists(user_file):
-        with open(user_file, 'r') as f:
+        with open(user_file, "r") as f:
             user_history = json.load(f)
         return jsonify(user_history), 200
     else:
         return jsonify({"conversations": {}, "currentConversationId": None}), 200
 
 
-@app.route('/get_details', methods=['POST'])
+@app.route("/get_details", methods=["POST"])
 def get_details():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
-    
-    product_id = request.json.get('id')
+
+    product_id = request.json.get("id")
     print("Product ID:", product_id)
 
-    id_data={"id":str(product_id)}
-    
+    id_data = {"id": str(product_id)}
+
     try:
-        data=id_data
+        data = id_data
         # response = requests.post(f"{BACKEND_URL}/getCategories", json=id_data)
         # if response.ok:
         id = data["id"]
@@ -336,14 +342,15 @@ def get_details():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": f"Error communicating with backend: {str(e)}"}), 500
 
-@app.route('/product_chat', methods=['POST'])
+
+@app.route("/product_chat", methods=["POST"])
 def product_chat():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
 
-    product_id = request.json.get('id')
-    user_message = request.json.get('message')
-    product_description = request.json.get('description', '')
+    product_id = request.json.get("id")
+    user_message = request.json.get("message")
+    product_description = request.json.get("description", "")
 
     try:
         # Fetch product details from FastAPI backend
@@ -363,7 +370,7 @@ def product_chat():
             data_send = list(data)[0]
         data_send["image"] = imageData
         # print(data_send)
-        product_details=data_send
+        product_details = data_send
         del product_details["image"]
         print("These are the product details: ", product_details)
         # Generate a prompt for Llama 3.1
@@ -402,14 +409,22 @@ def product_chat():
         # else:
         #     return jsonify({"error": f"Backend error: {response.text}"}), 500
     except Exception as e:
-        return jsonify({"error": f"Error in product chat: {str(e)} this is payload {product_details.keys()}"}), 500
+        return (
+            jsonify(
+                {
+                    "error": f"Error in product chat: {str(e)} this is payload {product_details.keys()}"
+                }
+            ),
+            500,
+        )
 
-@app.route('/generate_image_description', methods=['POST'])
+
+@app.route("/generate_image_description", methods=["POST"])
 def generate_image_description():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
 
-    product_id = request.json.get('id')
+    product_id = request.json.get("id")
 
     try:
         # Fetch product details from FastAPI backend
@@ -430,10 +445,10 @@ def generate_image_description():
             data_send = list(data)[0]
         data_send["image"] = imageData
         product_details = data_send
-        image_data = product_details.get('image')
-        if(image_data):
-            if(image_data[0]=='b'):
-                image_data=image_data[2:-1]
+        image_data = product_details.get("image")
+        if image_data:
+            if image_data[0] == "b":
+                image_data = image_data[2:-1]
 
         if not image_data:
             return jsonify({"error": "No image data found"}), 400
@@ -449,6 +464,6 @@ def generate_image_description():
         return jsonify({"error": f"Error generating image description: {str(e)}"}), 500
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # app.run(debug=True,port=5002)
     app.run()
