@@ -41,7 +41,7 @@ def requests_session_request(session, url, data):
 
 def run_benchmark(num_requests):
     url = "http://localhost:11434/api/generate"  # Adjust this URL to your Ollama server
-    data = '{"model": "mistral:7b-instruct-v0.3-q4_1", "prompt": "Hello, world!"}'  # Adjust model and prompt as needed
+    data = '{"model": "llama3.1:8b", "prompt": "Hello, world!"}'  # Adjust model and prompt as needed
 
     pycurl_times = []
     requests_times = []

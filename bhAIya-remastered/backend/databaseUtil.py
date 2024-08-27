@@ -47,7 +47,7 @@ class TextDatabaseCreator:
                     str(row[column]) for column in self.columnsToAccept
                 )
                 res1 = getCategoriesFromText(
-                    "mistral:7b-instruct-v0.3-q4_1",
+                    "llama3.1:8b",
                     description,
                     ollama=True,
                     session=session,

@@ -80,9 +80,9 @@ async def data(data: dict):
     categories = {}
     print(text)
     if text != None:
-        textCategories = getCategoriesFromQuery(
-            "mistral:7b-instruct-v0.3-q4_1", text, ollama=True
-        )["categories"][0]
+        textCategories = getCategoriesFromQuery("llama3.1:8b", text, ollama=True)[
+            "categories"
+        ][0]
     if img64 != None:
         imgCategories = getcategoriesFromImage(
             "llava-phi3:latest", imagePath=None, imgb64=img64, ollama=True

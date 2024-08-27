@@ -415,7 +415,7 @@ def getcategoriesFromImage(
             session=session,
         )
         res = getCategoriesFromText(
-            "mistral:7b-instruct-v0.3-q4_1",
+            "llama3.1:8b",
             res,
             ollama=True,
             session=session,

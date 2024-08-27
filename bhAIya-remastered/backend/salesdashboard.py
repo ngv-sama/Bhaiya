@@ -337,7 +337,7 @@
 #     submit_button = st.form_submit_button(label="Add Item")
 
 #     if submit_button:
-#         new_item = getCategoriesFromText("mistral:7b-instruct-v0.3-q4_1",new_prod_description,ollama=True)["categories"][0]
+#         new_item = getCategoriesFromText("llama3.1:8b",new_prod_description,ollama=True)["categories"][0]
 #         new_item["id"] = int(new_id)
 #         new_item["price"] = float(new_price)
 #         print(new_item)
@@ -514,7 +514,7 @@ db = client["bhAIya"]
 collection_a = db["database"]
 collection_i = db["imageDatabase"]
 
-base_url = "http://127.0.0.1:5004"
+base_url = "http://127.0.0.1:5000"
 
 
 # Function to encode image to Base64
@@ -606,11 +606,11 @@ with st.sidebar.form(key="add_item_form"):
             encoded_image = encode_image(image)
             collection_i.insert_one({"id": new_id, "image": encoded_image})
             image_categories = getcategoriesFromImage(
-                "mistral:7b-instruct-v0.3-q4_1", encoded_image, ollama=True
+                "llava-phi3:latest ", encoded_image, ollama=True
             )["categories"][0]
 
         text_categories = getCategoriesFromText(
-            "mistral:7b-instruct-v0.3-q4_1", new_prod_description, ollama=True
+            "llama3.1:8b", new_prod_description, ollama=True
         )["categories"][0]
 
         # Combine categories from image and text
