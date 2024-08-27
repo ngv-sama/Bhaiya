@@ -1,14 +1,10 @@
 import numpy as np
-from gensim.models import Word2Vec
 from sklearn.metrics.pairwise import cosine_similarity
-from Levenshtein import distance
 import sys
-import requests
 from dotenv import load_dotenv
 from utils import curl_request_embed
 import os
 import redis
-import pickle
 
 redis_client=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"),db=1)
 
