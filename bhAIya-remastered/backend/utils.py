@@ -351,3 +351,38 @@ def getcategoriesFromImage(modelname, imagePath, imgb64=None, ollama=True, sessi
         res = perform_request(f"{BASEURL}/api/generate", data, stream=True, use_pycurl=use_pycurl, session=session)
         res = getCategoriesFromText("mistral", res, ollama=True, session=session, use_pycurl=use_pycurl)
     return res
+
+
+
+#personalised disocunt function 
+
+def get_max_values(customers):
+    max_purchase_value = max(customer['avg_purchase_value'] for customer in customers)
+    max_discount_usage = max(customer['discount_usage'] for customer in customers)
+    max_purchase_frequency = max(customer['purchase_frequency'] for customer in customers)
+    max_purchase_recency = max(customer['purchase_recency'] for customer in customers)
+    
+    return max_purchase_value, max_discount_usage, max_purchase_frequency, max_purchase_recency
+
+def calculate_score_and_discount(avg_purchase_value, max_purchase_value, discount_usage, max_discount_usage, 
+                                  purchase_frequency, max_purchase_frequency, purchase_recency, max_recency, 
+                                  product_category=None):
+    # Calculate the weighted score based on customer attributes
+    score = (0.3 * (avg_purchase_value / max_purchase_value)) + \
+            (0.2 * (discount_usage / max_discount_usage)) + \
+            (0.3 * (purchase_frequency / max_purchase_frequency)) + \
+            (0.2 * (purchase_recency / max_recency))
+    
+    # Determine discount based on the calculated score
+    if score > 0.8:
+        discount = 0.20  # 20% discount for high-value customers
+    elif score > 0.5:
+        discount = 0.10  # 10% discount for moderate-value customers
+    else:
+        discount = 0.05  # 5% discount for low-value customers
+    
+    # Additional discount for specific product categories (e.g., electronics)
+    if product_category == "electronics":
+        discount += 0.05
+    
+    return score, discount * 100  # Return score and discount percentage
