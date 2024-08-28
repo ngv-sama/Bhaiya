@@ -41,31 +41,39 @@
             </div>
         </form>
         </div>
-    <div class="side-drawer" id="sideDrawer">
-        <div class="drawer-handle" id="drawerHandle">
-            <div class="handle-bar"></div>
+        <div class="side-drawer" id="sideDrawer">
+            <div class="drawer-handle" id="drawerHandle">
+                <div class="handle-bar"></div>
+            </div>
+            <div class="drawer-content">
+                <div class="top-buttons">
+                    <a href="{{ url_for('checkout') }}" class="top-button cart-button">CART</a>
+                    <a href="{{ url_for('bundles') }}" class="top-button bundles-button">BUNDLES</a>
+                </div>
+                <div class="cart-preview" id="cartPreview">
+                    <!-- Cart items will be dynamically added here -->
+                </div>
+                <div class="price-slider">
+                    <label for="priceSlider">Set Price Range:</label>
+                    <input type="range" id="priceSlider" min="0" max="1000" step="10" value="500">
+                    <span id="priceValue">₹500</span>
+                </div>
+                <h3>Chat History</h3>
+                <div class="history">
+                    <ul id="chat-history-list" class="conversation-list"></ul>
+                </div>
+                <div class="user-profile">
+                    <div class="user-info" id="userInfo">
+                        <span id="username"></span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="user-menu" id="userMenu">
+                        <a href="{{ url_for('profile') }}" class="menu-item">Profile</a>
+                        <a href="{{ url_for('logout') }}" class="menu-item">Log Out</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="drawer-content">
-            
-            
-            <div class="profile">
-                <h2>Welcome</h2>
-                <p>Username: <span id="username"></span></p>
-                <p>Email: <span id="user-email"></span></p>
-                <h4>Recent </h4>
-            </div>
-            
-            <div class="history">
-                <ul id="chat-history-list" class="conversation-list"></ul>
-            </div>
-            
-            <div class="options">
-                <a href="{{ url_for('checkout') }}" class="checkout-button" style="text-decoration: none;">Cart</a>
-                <a href="{{ url_for('login') }}" class="logout-button" style="text-decoration: none;">Log Out</a>
-            </div>
-        
-        </div>
-    </div>
     </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

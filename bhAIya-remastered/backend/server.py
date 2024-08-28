@@ -193,6 +193,18 @@ def checkout():
         return redirect(url_for('login'))
     return render_template('cart.html')
 
+@app.route('/bundles')
+def bundles():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('cart.html')
+
+@app.route('/profile')
+def profile():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('cart.html')
+
 @app.route('/view-product', methods=['POST'])
 def view_product():
     if 'email' not in session:
@@ -230,6 +242,36 @@ def add_to_cart():
     except Exception as e:
         print(f"Error adding product to cart: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/get_cart_items', methods=['GET'])
+def get_cart_items():
+    if not session.get('logged_in'):
+        return jsonify([])
+
+    user = users_collection.find_one({'email': session['email']})
+    
+    if not user or 'cart' not in user:
+        return jsonify([])
+
+    cart_items = []
+    
+    for product_id in user['cart']:
+        try:
+            product = next((p for p in imgDatabase if p['id'] == str(product_id)), None)
+            if not product:
+                product = next((p for p in imgDatabase if p['id'] == int(product_id)), None)
+        except Exception as e:
+            print(f"Error fetching product details: {str(e)}")
+            continue
+
+        if product:
+            cart_items.append({
+                'image': product['image']
+            })
+
+    return jsonify(cart_items)
+
+
 
 @app.route('/get_recommendations', methods=['POST'])
 def get_recommendations():
@@ -499,4 +541,4 @@ def generate_image_description():
 
 if __name__ == '__main__':
     # app.run(debug=True,port=5002)
-    app.run()
+    app.run(debug=True)

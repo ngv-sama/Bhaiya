@@ -15,6 +15,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const newChatButton = document.getElementById('new-chat-button');
     const chatHistoryList = document.getElementById('chat-history-list');
 
+    const priceSlider = document.getElementById('priceSlider');
+    const priceValue = document.getElementById('priceValue');
+    const userInfo = document.getElementById('userInfo');
+    const userMenu = document.getElementById('userMenu');
+
+    // Price slider functionality
+    priceSlider.addEventListener('input', function() {
+        const value = this.value;
+        priceValue.textContent = `₹${value}`;
+        localStorage.setItem('priceRange', value);
+    });
+
+    // Load price range from local storage
+    const savedPriceRange = localStorage.getItem('priceRange');
+    if (savedPriceRange) {
+        priceSlider.value = savedPriceRange;
+        priceValue.textContent = `₹${savedPriceRange}`;
+    }
+
+    // User profile menu toggle
+    userInfo.addEventListener('click', function() {
+        userMenu.style.display = userMenu.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    // Close user menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!userInfo.contains(event.target) && !userMenu.contains(event.target)) {
+            userMenu.style.display = 'none';
+        }
+    });
+
+    // Load cart items
+    function loadCartItems() {
+        fetch('/get_cart_items')
+            .then(response => response.json())
+            .then(data => {
+                const cartPreview = document.getElementById('cartPreview');
+                cartPreview.innerHTML = '';
+                data.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'cart-item';
+                    itemElement.innerHTML = `
+                        <img src="data:image/jpeg;base64,${item.image}" alt="${item.name}">
+                    `;
+                    cartPreview.appendChild(itemElement);
+                });
+            })
+            .catch(error => console.error('Error loading cart items:', error));
+    }
+
+    // Call loadCartItems when the page loads
+    loadCartItems();
+
     let conversations = {};
     let currentConversationId = null;
 
@@ -105,7 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             console.log("Received data:", data);
             username.textContent = data.username;
-            email.textContent = data.email;
             if (conversations[currentConversationId].length === 0) {
                 addMessage(`Hello, ${username.textContent}! I am bhAIya, your neighbourhood shopkeeper. How can I help?`, 'received');
             }
@@ -386,6 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function handleAddToCart(e) {
     const productId = e.target.getAttribute('data-product-id');
+    const productImage = e.target.closest('.item').querySelector('img').src;
     console.log('Adding product to cart:', productId);
     try {
         const response = await fetch('/add-to-cart', {
@@ -398,9 +451,26 @@ async function handleAddToCart(e) {
         const data = await response.json();
         if (data.success) {
             console.log('Product added to cart successfully');
-            // You can add some visual feedback here, like changing the button text or showing a notification
+            updateCartPreview(productId, productImage);
         }
     } catch (error) {
         console.error('Error adding product to cart:', error);
     }
+}
+
+function updateCartPreview(productId, productImage) {
+    const cartPreview = document.getElementById('cartPreview');
+    const itemElement = document.createElement('div');
+    itemElement.className = 'cart-item';
+    
+    const img = document.createElement('img');
+    img.src = productImage;
+    img.alt = `Product ${productId}`;
+    
+    
+    itemElement.appendChild(img);
+    cartPreview.appendChild(itemElement);
+
+    // Optional: Scroll to the bottom of the cart preview
+    cartPreview.scrollTop = cartPreview.scrollHeight;
 }
