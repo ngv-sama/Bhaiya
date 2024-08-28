@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from utils import curl_request_embed
 import os
 import redis
+import multiprocessing
 
 redis_client_1=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"),db=1)
 redis_client_2 = redis.Redis(
@@ -108,6 +109,10 @@ def sentence_vector(sentence,redis_client,id=None):
     return np.mean(embeddings,axis=0)
 
 
+# def compute_similarity_task(result_queue, label,text1, text2, redis_client, id=None):
+#     result = compute_similarity(text1, text2, redis_client, id)
+#     result_queue.put((label, result))
+
 def compute_similarity(text1, text2,redis_client,id=None):
     res = 0
     if(text1==[] or text2==[]):
@@ -142,6 +147,61 @@ def find_top_k_similar(match_data, data_list, top_k=3):
         additional_similarity = compute_similarity(
             match_additional, data["Additional details"], redis_client_4, data["id"]
         )
+        # result_queue = multiprocessing.Queue()
+        
+        # main_process = multiprocessing.Process(
+        #     target=compute_similarity_task,
+        #     args=(
+        #         result_queue,
+        #         "main",
+        #         match_main,
+        #         data["Main category"],
+        #         redis_client_2,
+        #         data["id"],
+        #     ),
+        # )
+        # sub_process = multiprocessing.Process(
+        #     target=compute_similarity_task,
+        #     args=(
+        #         result_queue,
+        #         "sub",
+        #         match_sub,
+        #         data["Sub categories"],
+        #         redis_client_3,
+        #         data["id"],
+        #     ),
+        # )
+        # additional_process = multiprocessing.Process(
+        #     target=compute_similarity_task,
+        #     args=(
+        #         result_queue,
+        #         "additional",
+        #         match_additional,
+        #         data["Additional details"],
+        #         redis_client_4,
+        #         data["id"],
+        #     ),
+        # )
+
+        # # Start the processes
+        # main_process.start()
+        # sub_process.start()
+        # additional_process.start()
+
+        # # Wait for all processes to complete
+        # main_process.join()
+        # sub_process.join()
+        # additional_process.join()
+
+        # # Retrieve and sort the results based on their labels
+        # results = {
+        #     label: result for label, result in [result_queue.get() for _ in range(3)]
+        # }
+
+        # main_similarity = results["main"]
+        # sub_similarity = results["sub"]
+        # additional_similarity = results["additional"]
+
         weighted_similarity = weighted_average_similarity(
             main_similarity, sub_similarity, additional_similarity,main_weight=main_weight,sub_weight=sub_weight,additional_weight=additional_weight
         )
@@ -149,11 +209,11 @@ def find_top_k_similar(match_data, data_list, top_k=3):
         # if(similarities.size<top_k):
         if(len(similarities)<top_k):
             #     # similarities=np.append(similarities,np.array([weighted_similarity,data]))
-            if weighted_similarity < min_similarity:
+            if weighted_similarity <= min_similarity:
                 min_similarity = weighted_similarity
             similarities.append((weighted_similarity, data))
         else:
-            if(weighted_similarity>min_similarity):
+            if(weighted_similarity>=min_similarity):
                 # print(similarities)
                 min_index=np.argmin([t[0] for t in similarities],axis=0)
                 similarities[min_index]=(weighted_similarity,data)

@@ -382,7 +382,7 @@ def product_chat():
         Provide a helpful and informative response based on the product details and description.
         """
         # Generate response using Llama 3.1
-        response = ollama_request("gemma2:2b", prompt)
+        response = ollama_request("mistral:latest", prompt)
         return jsonify({"response": response})
 
         # if response.ok:
@@ -403,7 +403,7 @@ def product_chat():
         #     """
 
         #     # Generate response using Llama 3.1
-        #     response = ollama_request("gemma2:2b", prompt)
+        #     response = ollama_request("mistral:latest", prompt)
 
         #     return jsonify({"response": response})
         # else:
