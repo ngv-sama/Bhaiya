@@ -24,19 +24,21 @@ from utils import (
 from similarity import find_top_k_similar
 from pymongo import MongoClient
 
-load_dotenv("/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/.env")
+load_dotenv()
 
 mongoDatabase = MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 
 # DATABASE_NAME="database"
 # DATABASE_NAME="database_500"
 # DATABASE_NAME="amazon_database"
-DATABASE_NAME = "only_clothes"
+# DATABASE_NAME = "only_clothes"
+DATABASE_NAME = "merged_text_3.6"
 
 # IMAGES_DATABASE= "imageDatabase"
 # IMAGES_DATABASE= "imageDatabase_500"
 # IMAGES_DATABASE = "amazon_images"
-IMAGES_DATABASE = "only_clothes_images"
+# IMAGES_DATABASE = "only_clothes_images"
+IMAGES_DATABASE = "merged_images_3.6"
 
 
 try:
@@ -65,7 +67,7 @@ BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
 OLLAMA_URL = os.getenv("OLLAMA_URL_SERVER")
 json
 cred = credentials.Certificate(
-    "/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json"
+   r"C:\Users\nikhi\Downloads\bhAIya-main\bhAIya-remastered\bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json"
 )
 firebase_admin.initialize_app(cred)
 
