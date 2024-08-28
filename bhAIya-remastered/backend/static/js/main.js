@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (Array.isArray(data) && data.length > 0) {
                     responseHTML += '<div class="product-grid">';
                     data.forEach(item => {
+                        console.log(item);
                         let base64Image = item.image;
                         if (base64Image.startsWith("b'")) {
                             base64Image = base64Image.slice(2, -1);
@@ -213,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p>Price: ${item.price}</p>
                                 <p>ID: ${item.id}</p>
                                 <a href="/item/${item.id}" class="view-product" data-id="${item.id}" data-image="${base64Image}" data-price="${item.price}">View</a>
+                                <button class="add-to-cart-btn" data-product-id="${item.id}" onclick="handleAddToCart(event)" >Add to Cart</button>
                             </div>
                         `;
                     });
@@ -222,6 +224,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 addMessage(responseHTML, 'received');
                 saveChatToServer();
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', handleViewProduct);
+                });
+                document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                    btn.addEventListener('click', handleAddToCart);
+                });
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -232,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function viewProduct(event) {
+    async function viewProduct(event) {
         if (event.target.classList.contains('view-product')) {
             event.preventDefault();
             const id = event.target.getAttribute('data-id');
@@ -243,12 +251,30 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.setItem(`product_${id}_image`, image);
             sessionStorage.setItem(`product_${id}_price`, price);
     
-            // Navigate to the product page
-            window.location.href = `/item/${id}`;
+            
+            console.log('Viewing product:', id);
+        try {
+            const response = await fetch('/view-product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_id: id }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                console.log('Product viewed successfully');
+            }
+        } catch (error) {
+            console.error('Error viewing product:', error);
         }
+        // Navigate to the product page
+        window.location.href = `/item/${id}`;
+        }
+        
     }
 
-    document.addEventListener('click', viewProduct);
+   document.addEventListener('click', viewProduct);
 
     newChatButton.addEventListener('click', function() {
         saveChatToServer();
@@ -349,4 +375,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     loadConversationsFromServer();
     fetchUserProfile();
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', handleViewProduct);
+    });
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', handleAddToCart);
+    });
 });
+
+
+async function handleAddToCart(e) {
+    const productId = e.target.getAttribute('data-product-id');
+    console.log('Adding product to cart:', productId);
+    try {
+        const response = await fetch('/add-to-cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ product_id: productId }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            console.log('Product added to cart successfully');
+            // You can add some visual feedback here, like changing the button text or showing a notification
+        }
+    } catch (error) {
+        console.error('Error adding product to cart:', error);
+    }
+}

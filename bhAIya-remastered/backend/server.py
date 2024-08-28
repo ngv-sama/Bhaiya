@@ -41,6 +41,8 @@ DATABASE_NAME = "merged_text_3.6"
 IMAGES_DATABASE = "merged_images_3.6"
 
 
+users_collection = mongoDatabase["User_Data"]
+
 try:
     # database = mongoDatabase["database"].find({}, {"_id": 0})
     # database = mongoDatabase["database_500"].find({}, {"_id": 0})
@@ -190,6 +192,44 @@ def checkout():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     return render_template('cart.html')
+
+@app.route('/view-product', methods=['POST'])
+def view_product():
+    if 'email' not in session:
+        return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+    product_id = request.json.get('product_id')
+    email = session['email']
+
+    try:
+        users_collection.update_one(
+            {'email': email},
+            {'$addToSet': {'viewed': product_id}},
+            upsert=True
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error viewing product: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/add-to-cart', methods=['POST'])
+def add_to_cart():
+    if 'email' not in session:
+        return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+    product_id = request.json.get('product_id')
+    email = session['email']
+
+    try:
+        users_collection.update_one(
+            {'email': email},
+            {'$addToSet': {'cart': product_id }},
+            upsert=True
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error adding product to cart: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/get_recommendations', methods=['POST'])
 def get_recommendations():
@@ -448,7 +488,7 @@ def generate_image_description():
 
         # Generate image description using LLaVA
         prompt = "Describe this product image in detail."
-        description = ollama_request("llava", prompt, image=image_data)
+        description = ollama_request("llava-phi3:latest", prompt, image=image_data)
 
         return jsonify({"description": description})
         # else:
