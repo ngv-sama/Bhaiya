@@ -158,13 +158,15 @@ def getCategoriesFromQuery(
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
         - Differentiate between main categories, subcategories, and additional details.
+        - Additional details should only contain fine details about the product.
 
         The response format should be:
         {{
             "categories": [{{
                 "Main category": ["Generated main categories..."],
                 "Sub categories": ["Generated sub categories..."],
-                "Additional details": ["Generated additional details or categories..."]
+                "Additional details": ["Generated additional details or categories..."],
+                "Brand": ["Brand name if mentioned in the text provided"]
             }}]
         }}
 
@@ -174,7 +176,8 @@ def getCategoriesFromQuery(
             "categories": [{{
                 "Main category": ["Gifts", "Holiday Items"],
                 "Sub categories": ["Decorations", "Accessories", "Home Decor"],
-                "Additional details": ["Winter", "Festive", "Family", "Traditional", "Modern"]
+                "Additional details": ["Winter", "Festive", "Family", "Traditional", "Modern"],
+                "Brand": ["Tanishq"]
             }}]
         }}
 
@@ -254,13 +257,15 @@ def getCategoriesFromText(
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
         - Differentiate between main categories, subcategories, and additional details.
+        - Additional details should only contain fine details about the product.
 
         The response format should be:
         {{
             "categories": [{{
                 "Main category": ["Extracted main categories...."],
                 "Sub categories": ["Extracted sub categories...."],
-                "Additional details": ["Extracted additional details or categories...."]
+                "Additional details": ["Extracted additional details or categories...."],
+                "Brand": ["Brand name if mentioned in the text provided"]
             }}]
         }}
 
@@ -271,7 +276,8 @@ def getCategoriesFromText(
             "categories": [{{
                 "Main category": ["Men's Apparel", "Tops", "T-shirts"],
                 "Sub categories": ["Summer Wear", "Casual"],
-                "Additional details": ["Puma", "Sports", "Black"]
+                "Additional details": ["Sports", "Black"],
+                "Brand": ["Puma"]
             }}]
 
         }}
@@ -283,6 +289,7 @@ def getCategoriesFromText(
                 "Main category": ["Men's Apparel", "Sports Wear"],
                 "Sub categories": ["Bottomwear", "Track Pants"],
                 "Additional details": ["Black", "Fall 2011.0", "Casual", "Manchester United", "Solid"]
+                "Brand": ["Adidas"]
             }}]
 
         }}
@@ -356,13 +363,14 @@ def getcategoriesFromImage(
         - Ensure that you pay attention to the colour and pattern of the product.
         - Do not generate duplicate categories.
         - Differentiate between main categories, subcategories, and additional details.
+        - Additional details should only contain fine details about the product.
         
         The response format should be:
         {{
             "categories": [{{
                 "Main category": ["Extracted main categories...."],
                 "Sub categories": ["Extracted sub categories...."],
-                "Additional details": ["Extracted additional details or categories...."]
+                "Additional details": ["Extracted additional details or categories...."],
             }}]
         }}
 
