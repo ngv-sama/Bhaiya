@@ -21,7 +21,7 @@ from utils import (
     getCategoriesFromQuery,
     getImage,
 )
-from similarity import find_top_k_similar
+from similarity import find_top_k_similar,get_personal_recommendations
 from pymongo import MongoClient
 
 load_dotenv()
@@ -31,17 +31,18 @@ mongoDatabase = MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 # DATABASE_NAME="database"
 # DATABASE_NAME="database_500"
 # DATABASE_NAME="amazon_database"
-# DATABASE_NAME = "only_clothes"
-DATABASE_NAME = "merged_text_3.6"
+DATABASE_NAME = "only_clothes"
+# DATABASE_NAME = "merged_text_3.6"
 
 # IMAGES_DATABASE= "imageDatabase"
 # IMAGES_DATABASE= "imageDatabase_500"
 # IMAGES_DATABASE = "amazon_images"
-# IMAGES_DATABASE = "only_clothes_images"
-IMAGES_DATABASE = "merged_images_3.6"
+IMAGES_DATABASE = "only_clothes_images"
+# IMAGES_DATABASE = "merged_images_3.6"
 
 
-users_collection = mongoDatabase["User_Data"]
+# users_collection = mongoDatabase["User_Data"]
+users_collection = mongoDatabase["history"]
 
 try:
     # database = mongoDatabase["database"].find({}, {"_id": 0})
@@ -275,7 +276,6 @@ def get_cart_items():
     return jsonify(cart_items)
 
 
-
 @app.route('/get_recommendations', methods=['POST'])
 def get_recommendations():
     if not session.get("logged_in"):
@@ -327,7 +327,6 @@ def get_recommendations():
         categories = imgCategories
     print(categories)
     results = find_top_k_similar(categories, database, top_k=5)
-    print(results)
     l = []
     for result in results:
         result[1]["image"] = getImage(imgDatabase, result[1]["id"])
@@ -553,6 +552,152 @@ def generate_image_description():
         #     return jsonify({"error": f"Backend error: {response.text}"}), 500
     except Exception as e:
         return jsonify({"error": f"Error generating image description: {str(e)}"}), 500
+
+
+@app.get("/getHistory")
+async def getHistory(data: dict):
+    id = data["currentConversationId"]
+    data = mongoDatabase["history"].find({"currentConversationId": id}, {"_id": 0})
+    data = list(data)[0]
+    return data
+
+
+@app.post("/addHistory")
+async def addHistory(data: dict):
+    incoming_data = data
+    id = incoming_data["currentConversationId"]
+    current_data = mongoDatabase["history"].find(
+        {"currentConversationId": id}, {"_id": 0}
+    )
+    current_data = list(current_data)
+    if current_data != []:
+        conversations = incoming_data["conversations"]
+        last_updated = incoming_data["last_updated"]
+        x = mongoDatabase["history"].update_one(
+            {"currentConversationId": id},
+            {"$set": {"conversations": conversations, "last_updated": last_updated}},
+        )
+        print(x)
+    else:
+        x = mongoDatabase["history"].insert_one(data)
+        print(x)
+
+
+@app.post("/addOne")
+async def addOne(data: dict):
+    """
+    Payload
+    {"data":{
+                "id":0,
+                "price":123,
+                "Main category":[],
+                "Sub categories":[],
+                "Additional details":[]
+            },
+            "imgData":{
+                  "id":0,
+                  "image":"b'/9j/4AAQSk'"
+              }
+    }
+    """
+    if data.get("data", None):
+        print("inserting into main database")
+        try:
+            x = mongoDatabase["database"].insert_one(data["data"])
+            print(x)
+        except Exception as e:
+            print(e)
+            print("Error inserting into main database")
+
+    if data.get("imgData", None):
+        print("inserting into image database")
+        try:
+            x = mongoDatabase["imageDatabase"].insert_one(data["imgData"])
+            print(x)
+        except Exception as e:
+            print("Error inserting into image database")
+
+
+@app.post("/removeOne")
+async def removeOne(data: dict):
+    """
+    Payload : 0(any integer, id to be removed)
+    """
+    id = data["id"]
+    print("deleting from database")
+    try:
+        x = mongoDatabase["database"].delete_one({"id": id})
+        print(x)
+    except Exception as e:
+        print("Error deleting from main database")
+
+    try:
+        x = mongoDatabase["imageDatabase"].delete_one({"id": id})
+        print(x)
+    except Exception as e:
+        print("Error deleting image database")
+
+
+@app.post("/addMany")
+async def addMany(data: dict):
+    """
+    payload
+    {
+        "data":[{
+            "id":0,
+            "price":123,
+            "Main category":[],
+            "Sub categories":[],
+            "Additional details":[]
+        },{
+            "id":0,
+            "price":123,
+            "Main category":[],
+            "Sub categories":[],
+            "Additional details":[]
+        }],
+        "imgData":[{
+            "id":0,
+            "image":"b'/9j/4AAQSk'"
+
+        },{
+            "id":0,
+            "image":"b'/9j/4AAQSk'"
+
+        }]
+    }
+    """
+    if data.get("data", None):
+        print("inserting many into database")
+        try:
+            x = mongoDatabase["database"].insert_many(data.get("data"))
+            print(x)
+        except Exception as e:
+            print("Error inserting many into main database")
+
+    if data.get("imgData", None):
+        try:
+            x = mongoDatabase["imageDatabase"].insert_many(data.get("imgData"))
+            print(x)
+        except Exception as e:
+            print("Error inserting many into image database")
+
+
+@app.route("/personal_recommendations",methods=["POST"])
+def personal_recommendations():
+    """
+        {
+      "user_id":123,
+      "categories":["clothes", "t-shirt","Mens fashion"],
+      "already_bought":[452,532]
+    }
+    """
+    if not session.get("logged_in"):
+        return jsonify({"error": "Not logged in"}), 401
+    preffered_categories = request.json.get("categories")
+    already_bought = request.json.get("already_bought")
+    user_id = request.json.get("user_id")
+    return {user_id:get_personal_recommendations(preffered_categories,database,already_bought,10)}
 
 
 if __name__ == "__main__":

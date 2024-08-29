@@ -28,8 +28,8 @@ DATABASE_NAME = "only_clothes"
 # IMAGES_DATABASE= "imageDatabase"
 # IMAGES_DATABASE= "imageDatabase_500"
 # IMAGES_DATABASE = "amazon_images"
-# IMAGES_DATABASE = "only_clothes_images"
-IMAGES_DATABASE = "merged_images_3.6"
+IMAGES_DATABASE = "only_clothes_images"
+# IMAGES_DATABASE = "merged_images_3.6" 
 
 
 

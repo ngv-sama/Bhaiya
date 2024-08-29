@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from utils import curl_request_embed
 import os
 import redis
-import multiprocessing
 
 redis_client_1=redis.Redis(host=os.getenv("REDIS_HOST"),port=os.getenv("REDIS_PORT"),db=1)
 redis_client_2 = redis.Redis(
@@ -147,7 +146,7 @@ def find_top_k_similar(match_data, data_list, top_k=3):
             match_additional, data["Additional details"], redis_client_4, data["id"]
         )
         # result_queue = multiprocessing.Queue()
-        
+
         # main_process = multiprocessing.Process(
         #     target=compute_similarity_task,
         #     args=(
@@ -216,7 +215,7 @@ def find_top_k_similar(match_data, data_list, top_k=3):
                 # print(similarities)
                 min_index=np.argmin([t[0] for t in similarities],axis=0)
                 similarities[min_index]=(weighted_similarity,data)
-                min_similarity = min([t[0] for t in similarities])
+                min_similarity = similarities[min_index][0]
 
     # Sort by similarity in descending order and get the top K
     # similarities.sort(reverse=True, key=lambda x: x[0])
@@ -224,14 +223,45 @@ def find_top_k_similar(match_data, data_list, top_k=3):
 
     # return [item[1] for item in similarities[:top_k]]
     # return similarities[:top_k]
-    print(similarities)
+    # print(similarities)
+    return similarities
+
+
+def get_personal_recommendations(
+    data, data_list, already_bought, recommendation_count=5
+):
+    min_similarity = np.inf
+    similarities = []
+    for match_data in data_list:
+        if match_data["id"] in already_bought:
+            continue
+        data_categories = []
+        if match_data["Additional details"] == []:
+            if match_data["Sub categories"] == []:
+                data_categories.extend(match_data["Main category"])
+            else:
+                data_categories.extend(match_data["Sub categories"])
+        else:
+            data_categories.extend(match_data["Additional details"])
+        similarity = compute_similarity(data, data_categories,redis_client_1,id=match_data["id"])
+        if len(similarities) < recommendation_count:
+            #     # similarities=np.append(similarities,np.array([weighted_similarity,data]))
+            if similarity < min_similarity:
+                min_similarity = similarity
+            similarities.append((similarity, match_data))
+        else:
+            if similarity > min_similarity:
+                # print(similarities)
+                min_index = np.argmin([t[0] for t in similarities], axis=0)
+                similarities[min_index] = (similarity, match_data)
+                min_similarity = similarities[min_index][0]
     return similarities
 
 
 if __name__ == "__main__":
-    print("Running similarity.py")
+#     print("Running similarity.py")
 
-    # Sample data
+#     # Sample data
     data_list = [
         {"id":452,"Main category": ["banana", "cherry", "date"], "Sub categories": ["elephant", "frog", "goat"],"Additional details": ["Summer", "red", "fruit", "Party"] },
         {"id":532,"Main category": ["sports", "clothes", "football"], "Sub categories": ["blue", "shirt", "large"],"Additional details": ["Summer 2012.0", "Blue", "Casual", "Party"]},
@@ -241,12 +271,13 @@ if __name__ == "__main__":
     ]
 
 
-    # match_data = {"Main category": ["apple", "banana", "cherry"], "Sub categories": ["dog", "elephant", "frog"]}
-    match_data = {"Main category": ["clothes", "t-shirt","Mens fashion"], "Sub categories": ["deep blue", "big"], "Additional details": ["sports","cricket"]}
+#     # match_data = {"Main category": ["apple", "banana", "cherry"], "Sub categories": ["dog", "elephant", "frog"]}
+    match_data = ["clothes", "t-shirt","Mens fashion"]
 
-    # Prepare sentences for training the Word2Vec model
+#     # Prepare sentences for training the Word2Vec model
 
-    # Find top 3 similar items
-    top_k_similar = find_top_k_similar(match_data, data_list, top_k=2)
-    print("\n\n",top_k_similar)
-    print("Done running similarity.py")
+#     # Find top 3 similar items
+#     top_k_similar = find_top_k_similar(match_data, data_list, top_k=2)
+#     print("\n\n",top_k_similar)
+#     print("Done running similarity.py")
+    print(get_personal_recommendations(match_data,data_list,[452,532],recommendation_count=2))
