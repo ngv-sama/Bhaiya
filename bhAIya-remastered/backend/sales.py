@@ -1,3 +1,21 @@
+#{
+# "customer_id": 1,
+#"customer_name": "Evelyn Martinez",
+#"avg_purchase_value": 1562.32,
+#"discount_usage": 5,
+#  "purchase_frequency": 15,
+#  "product_tags": [
+#    "electronics"
+#  ],
+#  "product_category": "electronics",
+#  "subcategory": [
+#    "smartphones",
+#    "laptops"
+#  ],
+#  "purchase_recency": 12,
+#  "geo_location": "North America"
+#}
+
 # import streamlit as st
 # import pymongo
 # from pymongo import MongoClient
