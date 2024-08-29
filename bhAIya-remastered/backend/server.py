@@ -69,7 +69,7 @@ BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
 OLLAMA_URL = os.getenv("OLLAMA_URL_SERVER")
 json
 cred = credentials.Certificate(
-   r"C:\Users\nikhi\Downloads\bhAIya-main\bhAIya-remastered\bhaiya-ee84c-firebase-adminsdk-w4fz2-15489a0102.json"
+    os.getenv("FIREBASE_CREDENTIALS")
 )
 firebase_admin.initialize_app(cred)
 
@@ -327,6 +327,7 @@ def get_recommendations():
         categories = imgCategories
     print(categories)
     results = find_top_k_similar(categories, database, top_k=5)
+    print(results)
     l = []
     for result in results:
         result[1]["image"] = getImage(imgDatabase, result[1]["id"])
