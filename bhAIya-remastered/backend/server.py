@@ -31,18 +31,18 @@ mongoDatabase = MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 # DATABASE_NAME="database"
 # DATABASE_NAME="database_500"
 # DATABASE_NAME="amazon_database"
-DATABASE_NAME = "only_clothes"
-# DATABASE_NAME = "merged_text_3.6"
+# DATABASE_NAME = "only_clothes"
+DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 # IMAGES_DATABASE= "imageDatabase"
 # IMAGES_DATABASE= "imageDatabase_500"
 # IMAGES_DATABASE = "amazon_images"
-IMAGES_DATABASE = "only_clothes_images"
-# IMAGES_DATABASE = "merged_images_3.6"
+# IMAGES_DATABASE = "only_clothes_images"
+IMAGES_DATABASE = os.getenv("IMAGES_DATABASE")
 
 
-# users_collection = mongoDatabase["User_Data"]
-users_collection = mongoDatabase["history"]
+users_collection = mongoDatabase[os.getenv("USERS_COLLECTION")]
+
 
 try:
     # database = mongoDatabase["database"].find({}, {"_id": 0})
@@ -238,10 +238,10 @@ def add_to_cart():
 
     try:
         users_collection.update_one(
-            {'email': email},
-            {'$addToSet': {'cart': product_id }},
-            upsert=True
-        )
+        {'email': email},
+        {'$inc': {'cart.' + product_id: 1}},
+        upsert=True
+    )
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error adding product to cart: {e}")
@@ -259,7 +259,7 @@ def get_cart_items():
 
     cart_items = []
     
-    for product_id in user['cart']:
+    for product_id, quantity in user['cart'].items():
         try:
             product = next((p for p in imgDatabase if p['id'] == str(product_id)), None)
             if not product:
@@ -270,9 +270,12 @@ def get_cart_items():
 
         if product:
             cart_items.append({
-                'image': product['image']
+                'id': product['id'],
+                'image': product['image'],
+                'quantity': quantity
             })
 
+    print(cart_items)
     return jsonify(cart_items)
 
 
@@ -702,4 +705,4 @@ def personal_recommendations():
 
 if __name__ == "__main__":
     # app.run(debug=True,port=5002)
-    app.run(debug=True)
+    app.run()

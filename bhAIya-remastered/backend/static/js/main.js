@@ -51,15 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/get_cart_items')
             .then(response => response.json())
             .then(data => {
+                console.log('Received cart items:', data);
                 const cartPreview = document.getElementById('cartPreview');
                 cartPreview.innerHTML = '';
                 data.forEach(item => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'cart-item';
-                    itemElement.innerHTML = `
-                        <img src="data:image/jpeg;base64,${item.image}" alt="${item.name}">
-                    `;
-                    cartPreview.appendChild(itemElement);
+                    console.log(item);
+                    updateCartPreview(item.id, `data:image/jpeg;base64,${item.image}`, item.count);
                 });
             })
             .catch(error => console.error('Error loading cart items:', error));
@@ -458,19 +455,24 @@ async function handleAddToCart(e) {
     }
 }
 
-function updateCartPreview(productId, productImage) {
+function updateCartPreview(productId, productImage, count = 1) {
     const cartPreview = document.getElementById('cartPreview');
-    const itemElement = document.createElement('div');
-    itemElement.className = 'cart-item';
+    let itemElement = cartPreview.querySelector(`[data-product-id="${productId}"]`);
     
-    const img = document.createElement('img');
-    img.src = productImage;
-    img.alt = `Product ${productId}`;
-    
-    
-    itemElement.appendChild(img);
-    cartPreview.appendChild(itemElement);
-
-    // Optional: Scroll to the bottom of the cart preview
-    cartPreview.scrollTop = cartPreview.scrollHeight;
+    if (itemElement) {
+        // If the item is already in the preview, update the count
+        const countElement = itemElement.querySelector('.item-count');
+        const currentCount = parseInt(countElement.textContent, 10);
+        countElement.textContent = currentCount + 1;
+    } else {
+        // If the item is not in the preview, add it
+        itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.setAttribute('data-product-id', productId);
+        itemElement.innerHTML = `
+            <img src="${productImage}" alt="Product ${productId}">
+            <span class="item-count">${count}</span>
+        `;
+        cartPreview.appendChild(itemElement);
+    }
 }
