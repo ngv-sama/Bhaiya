@@ -22,6 +22,7 @@ from utils import (
     getImage,
 )
 from similarity import find_top_k_similar,get_personal_recommendations
+from comfyui_util import queue_prompt
 from pymongo import MongoClient
 
 load_dotenv()
@@ -190,6 +191,36 @@ def dashboard():
         return redirect(url_for("login"))
     return render_template("dash.html")
 
+@app.route('/payment-confirmation', methods=['GET'])
+def payment_confirmation():
+    return render_template('payment_confirmation.html')
+
+
+import stripe
+
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+@app.route('/api/create-payment-intent', methods=['POST'])
+def create_payment_intent():
+    try:
+        data = request.json
+        amount = data['amount']
+
+        # Create a PaymentIntent with the order amount and currency
+        intent = stripe.PaymentIntent.create(
+            amount=int(amount * 100),  # Convert to cents
+            currency='usd',
+            automatic_payment_methods={
+                'enabled': True,
+            },
+        )
+
+        return jsonify({
+            'clientSecret': intent.client_secret
+        })
+    except Exception as e:
+        return jsonify(error=str(e)), 403
+
 
 @app.route('/cart')
 def checkout():
@@ -207,7 +238,75 @@ def bundles():
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    return render_template('cart.html')
+    return render_template('profile.html')
+
+from flask import jsonify, request, session
+
+@app.route('/get_user_data', methods=['GET'])
+def get_user_data():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    user = users_collection.find_one({'email': session['email']})
+    if(user.get('name')):
+        name = user.get('name')
+    else:
+        name = session['username']
+    if user:
+        return jsonify({
+            'name': name,
+            'age': user.get('age'),
+            'gender': user.get('gender'),
+            'location': user.get('location'),
+            'description': user.get('description'),
+            'prompt': user.get('prompt'),
+        })
+    return jsonify({}), 404
+
+@app.route('/save_user_data', methods=['POST'])
+def save_user_data():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.json
+    users_collection.update_one(
+        {'email': session['email']},
+        {'$set': {
+            'name': data.get('name'),
+            'age': data.get('age'),
+            'gender': data.get('gender'),
+            'location': data.get('location'),
+            'description': data.get('description')
+        }},
+        upsert=True
+    )
+    return jsonify({'message': 'Profile saved successfully'}), 200
+
+@app.route('/save_prompt', methods=['POST'])
+def save_prompt():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.json
+    users_collection.update_one(
+        {'email': session['email']},
+        {'$set': {'prompt': data.get('prompt')}},
+        upsert=True
+    )
+    return jsonify({'message': 'Prompt saved successfully'}), 200
+
+@app.route('/get_orders', methods=['GET'])
+def get_orders():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    # Placeholder for order retrieval logic
+    # Replace this with actual order retrieval from your database
+    orders = [
+        {'id': '1', 'date': '2023-08-30', 'status': 'Shipped'},
+        {'id': '2', 'date': '2023-08-29', 'status': 'Processing'}
+    ]
+    return jsonify(orders), 200
 
 @app.route('/view-product', methods=['POST'])
 def view_product():
@@ -228,20 +327,40 @@ def view_product():
         print(f"Error viewing product: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# @app.route('/add-to-cart', methods=['POST'])
+# def add_to_cart():
+#     if 'email' not in session:
+#         return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+#     product_id = request.json.get('product_id')
+#     email = session['email']
+
+#     try:
+#         users_collection.update_one(
+#         {'email': email},
+#         {'$inc': {'cart.' + product_id: 1}},
+#         upsert=True
+#     )
+#         return jsonify({'success': True})
+#     except Exception as e:
+#         print(f"Error adding product to cart: {e}")
+#         return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/add-to-cart', methods=['POST'])
 def add_to_cart():
     if 'email' not in session:
         return jsonify({'success': False, 'error': 'User not logged in'}), 401
 
     product_id = request.json.get('product_id')
+    quantity = request.json.get('quantity', 1)  # Default to 1 if quantity not provided
     email = session['email']
 
     try:
         users_collection.update_one(
-        {'email': email},
-        {'$inc': {'cart.' + product_id: 1}},
-        upsert=True
-    )
+            {'email': email},
+            {'$set': {f'cart.{product_id}': quantity}},
+            upsert=True
+        )
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error adding product to cart: {e}")
@@ -261,22 +380,90 @@ def get_cart_items():
     
     for product_id, quantity in user['cart'].items():
         try:
-            product = next((p for p in imgDatabase if p['id'] == str(product_id)), None)
+            product = next((p for p in database if p['id'] == str(product_id)), None)
             if not product:
-                product = next((p for p in imgDatabase if p['id'] == int(product_id)), None)
+                product = next((p for p in database if p['id'] == int(product_id)), None)
         except Exception as e:
             print(f"Error fetching product details: {str(e)}")
+            continue
+
+        try:
+            image_data = next((p for p in imgDatabase if p['id'] == str(product_id)), None)
+            if not image_data:
+                image_data = next((p for p in imgDatabase if p['id'] == int(product_id)), None)
+        except Exception as e:
+            print(f"Error fetching image data: {str(e)}")
             continue
 
         if product:
             cart_items.append({
                 'id': product['id'],
-                'image': product['image'],
+                'price': float(product['price']),
+                'image': image_data['image'],
                 'quantity': quantity
             })
 
-    print(cart_items)
     return jsonify(cart_items)
+
+
+@app.route('/update_cart_quantity', methods=['POST'])
+def update_cart_quantity():
+    if not session.get('logged_in'):
+        return jsonify({'success': False, 'error': 'User not logged in'}), 401
+
+    product_id = request.json.get('product_id')
+    quantity = request.json.get('quantity')
+    email = session['email']
+
+    if quantity < 1:
+        return jsonify({'success': False, 'error': 'Quantity must be at least 1'}), 400
+
+    try:
+        users_collection.update_one(
+            {'email': email},
+            {'$set': {f'cart.{product_id}': quantity}},
+            upsert=True
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error updating cart quantity: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route("/get_details", methods=["POST"])
+def get_details():
+    if not session.get("logged_in"):
+        return jsonify({"error": "Not logged in"}), 401
+
+    product_id = request.json.get("id")
+    print("Product ID:", product_id)
+
+    id_data = {"id": str(product_id)}
+
+    try:
+        data = id_data
+        # response = requests.post(f"{BACKEND_URL}/getCategories", json=id_data)
+        # if response.ok:
+        id = data["id"]
+        # data=mongoDatabase["database"].find({"id":int(id)},{"_id":0})
+        # data=mongoDatabase["database_500"].find({"id":str(id)},{"_id":0})
+        try:
+            data = mongoDatabase[DATABASE_NAME].find({"id": str(id)}, {"_id": 0})
+            imageData = getImage(imgDatabase, str(id))
+            data_send = list(data)[0]
+
+        except Exception as e:
+            data = mongoDatabase[DATABASE_NAME].find({"id": int(id)}, {"_id": 0})
+            imageData = getImage(imgDatabase, int(id))
+            data_send = list(data)[0]
+        data_send["image"] = imageData
+        product_details = data_send
+        return jsonify(product_details)
+        # else:
+        #     return jsonify({"error": f"Backend error: {response.text}"}), 500
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Error communicating with backend: {str(e)}"}), 500
+
 
 
 @app.route('/get_recommendations', methods=['POST'])
@@ -399,42 +586,6 @@ def get_chat_history():
         return jsonify(user_history), 200
     else:
         return jsonify({"conversations": {}, "currentConversationId": None}), 200
-
-
-@app.route("/get_details", methods=["POST"])
-def get_details():
-    if not session.get("logged_in"):
-        return jsonify({"error": "Not logged in"}), 401
-
-    product_id = request.json.get("id")
-    print("Product ID:", product_id)
-
-    id_data = {"id": str(product_id)}
-
-    try:
-        data = id_data
-        # response = requests.post(f"{BACKEND_URL}/getCategories", json=id_data)
-        # if response.ok:
-        id = data["id"]
-        # data=mongoDatabase["database"].find({"id":int(id)},{"_id":0})
-        # data=mongoDatabase["database_500"].find({"id":str(id)},{"_id":0})
-        try:
-            data = mongoDatabase[DATABASE_NAME].find({"id": str(id)}, {"_id": 0})
-            imageData = getImage(imgDatabase, str(id))
-            data_send = list(data)[0]
-
-        except Exception as e:
-            data = mongoDatabase[DATABASE_NAME].find({"id": int(id)}, {"_id": 0})
-            imageData = getImage(imgDatabase, int(id))
-            data_send = list(data)[0]
-        data_send["image"] = imageData
-        product_details = data_send
-        return jsonify(product_details)
-        # else:
-        #     return jsonify({"error": f"Backend error: {response.text}"}), 500
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": f"Error communicating with backend: {str(e)}"}), 500
-
 
 @app.route("/product_chat", methods=["POST"])
 def product_chat():
@@ -703,6 +854,13 @@ def personal_recommendations():
     return {user_id:get_personal_recommendations(preffered_categories,database,already_bought,10)}
 
 
+@app.route("/generate_custom_image", methods=["POST"])
+def generate_custom_image():
+    if not session.get("logged_in"):
+        return jsonify({"error": "Not logged in"}), 401
+    query = request.json.get("query")
+    return queue_prompt(query)
+
 if __name__ == "__main__":
     # app.run(debug=True,port=5002)
-    app.run()
+    app.run(debug=True)

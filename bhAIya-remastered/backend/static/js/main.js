@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.innerHTML = '';
             imageUpload.value = '';
             const typingIndicator = showTypingIndicator();
-
+            
             fetch('/get_recommendations', {
                 method: 'POST',
                 body: formData
