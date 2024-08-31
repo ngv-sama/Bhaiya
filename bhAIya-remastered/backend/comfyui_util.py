@@ -86,7 +86,7 @@ def queue_prompt(prompt, steps=1):
   },
   "6": {
     "inputs": {
-      "text": "A beautiful woman in a stunning red dress with flowing black hair, standing near a fireplace, elegant, side view, hyper realistic, 4k, cinematic lighting, royalty, super clear, high quality",
+      "text": prompt,
       "clip": [
         "11",
         0
