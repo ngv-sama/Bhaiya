@@ -839,21 +839,96 @@ async def addMany(data: dict):
             print("Error inserting many into image database")
 
 
-@app.route("/personal_recommendations",methods=["POST"])
+# @app.route("/personal_recommendations",methods=["POST"])
+# def personal_recommendations():
+#     """
+#         {
+#       "user_id":123,
+#       "categories":["clothes", "t-shirt","Mens fashion"],
+#       "already_bought":[452,532]
+#     }
+#     """
+#     if not session.get("logged_in"):
+#         return jsonify({"error": "Not logged in"}), 401
+#     # preffered_categories = request.json.get("categories")
+#     # already_bought = request.json.get("already_bought")
+#     # user_id = request.json.get("user_id")
+
+#     user_visited_ids = users_collection.find_one({'email': session['email']}).get('visited')
+#     user_order_ids = users_collection.find_one({'email': session['email']}).get('cart')
+
+
+
+
+#     return {user_id:get_personal_recommendations(preffered_categories,database,already_bought,10)}
+
+def append_images_to_recommendations(basket_data, imgDatabase):
+    updated_basket_data = []
+    
+    for score, product in basket_data:
+        product_id = product['id']
+        
+        # Find the corresponding image in the imgDatabase
+        image_entry = next((img for img in imgDatabase if img['id'] == product_id), None)
+        
+        if image_entry:
+            # Append the image URL to the product information
+            product['image'] = image_entry.get('image', '')
+        else:
+            # If no image is found, add a placeholder or leave it empty
+            product['image'] = ''
+        
+        updated_basket_data.append((score, product))
+    
+    return updated_basket_data
+
+
+products_collection = mongoDatabase[DATABASE_NAME]
+@app.route("/personal_recommendations", methods=["GET"])
 def personal_recommendations():
-    """
-        {
-      "user_id":123,
-      "categories":["clothes", "t-shirt","Mens fashion"],
-      "already_bought":[452,532]
-    }
-    """
     if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
-    preffered_categories = request.json.get("categories")
-    already_bought = request.json.get("already_bought")
-    user_id = request.json.get("user_id")
-    return {user_id:get_personal_recommendations(preffered_categories,database,already_bought,10)}
+    
+    user_email = session.get("email")  # Get email from session
+    if not user_email:
+        return jsonify({"error": "User email not found in session"}), 400
+
+    # Fetch user data
+    user = users_collection.find_one({"email": user_email})
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Get product IDs from cart and viewed
+    cart_product_ids = list(user.get('cart', {}).keys())
+    viewed_product_ids = user.get('viewed', [])
+    product_ids = cart_product_ids + viewed_product_ids
+    
+    # Get categories from these products
+    categories = []
+    for product_id in product_ids:
+        product = products_collection.find_one({"id": product_id})
+        if product:
+            categories.extend(product.get('Main category', []))
+            categories.extend(product.get('Sub categories', []))
+            categories.extend(product.get('Additional details', []))
+
+    # Remove duplicates
+    categories = list(set(categories))
+
+    # Get already bought products
+    already_bought = [order['product_id'] for order in user.get('orders', [])]
+
+    user_basket_data = {
+        "user_id": user_email,
+        "categories": categories,
+        "already_bought": already_bought}
+    print(user_basket_data)
+    basket_data= get_personal_recommendations(user_basket_data['categories'], list( mongoDatabase[DATABASE_NAME].find({}, {"_id": 0})), user_basket_data['already_bought'], 10)
+    updated_basket_data = append_images_to_recommendations(basket_data, imgDatabase)
+    print(updated_basket_data)
+    return jsonify(updated_basket_data)
+    
 
 
 @app.route("/generate_custom_image", methods=["POST"])

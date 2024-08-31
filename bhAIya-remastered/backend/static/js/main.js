@@ -20,7 +20,68 @@ document.addEventListener('DOMContentLoaded', function() {
     const userInfo = document.getElementById('userInfo');
     const userMenu = document.getElementById('userMenu');
 
-    // Price slider functionality
+    const bundleButton = document.getElementById('bundle-button');
+
+    bundleButton.addEventListener('click', async function generateBundles(event) {
+    console.log('Generating bundles');
+    
+        addMessage('Generating personalized bundle recommendations...', 'received');
+
+    // Show loading animation
+    const typingIndicator = showTypingIndicator();
+    
+    try {
+        const response = await fetch('/personal_recommendations', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // Remove loading animation
+        removeTypingIndicator(typingIndicator);
+
+        // Render the data as HTML in a product grid
+        let responseHTML = 'Here are some personalized bundle recommendations for you:';
+        responseHTML += '<div class="product-grid">';
+        
+        data.forEach(item => {
+            const [score, product] = item;
+            responseHTML += `
+                <div class="item">
+                    <img src="data:image/jpeg;base64,${product.image}" alt="${product.id}">
+                    <p>Price: $${product.price}</p>
+                    <p>ID: ${product.id}</p>
+                    <p>Category: ${product['Main category'].join(', ')}</p>
+                    <a href="/item/${product.id}" class="view-product" data-id="${product.id}" data-price="${product.price}">View</a>
+                    <button class="add-to-cart-btn" data-product-id="${product.id}" onclick="handleAddToCart(event)">Add to Cart</button>
+                </div>
+            `;
+        });
+        
+        responseHTML += '</div>';
+
+        // Add the message to the chat
+        addMessage(responseHTML, 'received');
+        saveChatToServer();
+
+        // Add event listeners for the new buttons
+        document.querySelectorAll('.view-product').forEach(btn => {
+            btn.addEventListener('click', handleViewProduct);
+        });
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', handleAddToCart);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        removeTypingIndicator(typingIndicator);
+        addMessage('Sorry, there was an error generating bundle recommendations.', 'received');
+        saveChatToServer();
+    }
+});
+    
+        // Price slider functionality
     priceSlider.addEventListener('input', function() {
         const value = this.value;
         priceValue.textContent = `₹${value}`;
@@ -496,6 +557,8 @@ async function handleAddToCart(e) {
     } catch (error) {
         console.error('Error adding product to cart:', error);
     }
+
+    
 }
 
 function updateCartPreview(productId, productImage, count = 1) {
@@ -519,3 +582,5 @@ function updateCartPreview(productId, productImage, count = 1) {
         cartPreview.appendChild(itemElement);
     }
 }
+
+

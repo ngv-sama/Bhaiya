@@ -16,7 +16,9 @@
     <div class="chat-container">
         <header>
             <button id="new-chat-button" class="ios-button">New Chat</button>
+            
             <h1>bhAIya</h1>
+            <button id="bundle-button" class="ios-button" style="margin-right: 20px;">Bundle</button>
             <div class="mode-toggle">
                 <input type="checkbox" id="mode-switch" class="mode-switch-checkbox">
                 <label for="mode-switch" class="mode-switch-label">
@@ -52,7 +54,6 @@
             <div class="drawer-content">
                 <div class="top-buttons">
                     <a href="{{ url_for('checkout') }}" class="top-button cart-button">CART</a>
-                    <a href="{{ url_for('bundles') }}" class="top-button bundles-button">BUNDLES</a>
                 </div>
                 <div class="cart-preview" id="cartPreview">
                     <!-- Cart items will be dynamically added here -->
