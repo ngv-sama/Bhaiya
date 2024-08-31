@@ -858,8 +858,8 @@ def personal_recommendations():
 def generate_custom_image():
     if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
-    query = request.json.get("query")
-    return queue_prompt(query)
+    query = request.form.get("description")
+    return queue_prompt(query, steps=10)
 
 if __name__ == "__main__":
     # app.run(debug=True,port=5002)

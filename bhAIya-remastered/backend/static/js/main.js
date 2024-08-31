@@ -223,23 +223,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const userMessage = userInput.value.trim();
-        const uploadedImage = imageUpload.files[0];
+    
+const modeSwitch = document.getElementById('mode-switch');
 
-        if (userMessage || uploadedImage) {
-            let imageUrl = null;
-            if (uploadedImage) {
-                imageUrl = URL.createObjectURL(uploadedImage);
-            }
-            addMessage(userMessage, 'sent', imageUrl);
-            userInput.value = '';
-            imagePreview.innerHTML = '';
-            imageUpload.value = '';
-            const typingIndicator = showTypingIndicator();
-            
+// Add event listener for form submission
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const userMessage = userInput.value.trim();
+    const uploadedImage = imageUpload.files[0];
+
+    if (userMessage || uploadedImage) {
+        let imageUrl = null;
+        if (uploadedImage) {
+            imageUrl = URL.createObjectURL(uploadedImage);
+        }
+        addMessage(userMessage, 'sent', imageUrl);
+        userInput.value = '';
+        imagePreview.innerHTML = '';
+        imageUpload.value = '';
+        const typingIndicator = showTypingIndicator();
+
+        // Check the state of the toggle switch
+        if (!modeSwitch.checked) {
+            // Toggle is off, use the original behavior
             fetch('/get_recommendations', {
                 method: 'POST',
                 body: formData
@@ -263,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p>Price: ${item.price}</p>
                                 <p>ID: ${item.id}</p>
                                 <a href="/item/${item.id}" class="view-product" data-id="${item.id}" data-image="${base64Image}" data-price="${item.price}">View</a>
-                                <button class="add-to-cart-btn" data-product-id="${item.id}" onclick="handleAddToCart(event)" >Add to Cart</button>
+                                <button class="add-to-cart-btn" data-product-id="${item.id}" onclick="handleAddToCart(event)">Add to Cart</button>
                             </div>
                         `;
                     });
@@ -286,8 +293,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 addMessage('Sorry, there was an error processing your request.', 'received');
                 saveChatToServer();
             });
+        } else {
+            // Toggle is on, use the new behavior
+            fetch('/generate_custom_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received custom image data:", data);
+                removeTypingIndicator(typingIndicator);
+                let responseHTML = 'Here\'s a custom image based on your request:';
+                
+                // Assuming the API returns an object with a single key-value pair
+                const [description, base64Image] = Object.entries(data)[0];
+                
+                responseHTML += `
+                    <div class="custom-image-container">
+                        <img src="data:image/jpeg;base64,${base64Image}" alt="${description}">
+                        <button class="custom-product-btn">Custom Product</button>
+                    </div>
+                `;
+                
+                addMessage(responseHTML, 'received');
+                saveChatToServer();
+                
+                // Add event listener for the Custom Product button if needed
+                // document.querySelector('.custom-product-btn').addEventListener('click', handleCustomProduct);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                removeTypingIndicator(typingIndicator);
+                addMessage('Sorry, there was an error generating a custom image.', 'received');
+                saveChatToServer();
+            });
         }
-    });
+    }
+});
 
     async function viewProduct(event) {
         if (event.target.classList.contains('view-product')) {

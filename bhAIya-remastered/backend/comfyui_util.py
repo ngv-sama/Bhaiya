@@ -71,7 +71,7 @@ def compress_image(base64_string, max_size=(250, 250), quality=85):
 
     return compressed_base64, format_used
 
-def queue_prompt(prompt):
+def queue_prompt(prompt, steps=1):
     workflow = {
   "5": {
     "inputs": {
@@ -145,7 +145,7 @@ def queue_prompt(prompt):
   "30": {
     "inputs": {
       "seed": 96015080338362,
-      "steps": 1,
+      "steps": steps,
       "cfg": 1.5,
       "sampler_name": "euler",
       "scheduler": "normal",

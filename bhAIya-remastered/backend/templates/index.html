@@ -10,16 +10,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/chat.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/drawer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home_page/toggle.css') }}">
 </head>
 <body>
     <div class="chat-container">
         <header>
-            
             <button id="new-chat-button" class="ios-button">New Chat</button>
             <h1>bhAIya</h1>
-            <a href="{{ url_for('login') }}" class="ios-button" style="text-decoration: none;">Log Out</a>
-            
-            
+            <div class="mode-toggle">
+                <input type="checkbox" id="mode-switch" class="mode-switch-checkbox">
+                <label for="mode-switch" class="mode-switch-label">
+                    <span class="mode-switch-inner"></span>
+                    <span class="mode-switch-switch"></span>
+                </label>
+            </div>
         </header>
         <div class="chat-messages" id="chat-messages">
             <div class="message received">
