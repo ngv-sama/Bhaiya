@@ -86,7 +86,7 @@ def queue_prompt(prompt, steps=1):
   },
   "6": {
     "inputs": {
-      "text": "A beautiful woman in a stunning red dress with flowing black hair, standing near a fireplace, elegant, side view, hyper realistic, 4k, cinematic lighting, royalty, super clear, high quality",
+      "text": prompt,
       "clip": [
         "11",
         0
@@ -219,23 +219,24 @@ def queue_prompt(prompt, steps=1):
 
     p = {"prompt": workflow}
     data = json.dumps(p).encode('utf-8')
-    
+
     try:
-        req = request.Request("http://127.0.0.1:8188/prompt", data=data, method="POST")
+        req = request.Request("https://21d1-122-187-108-202.ngrok-free.app/prompt", data=data, method="POST")
+        print(data)
         req.add_header('Content-Type', 'application/json')
-        
+
         with request.urlopen(req) as response:
             response_data = response.read().decode('utf-8')
             print(f"Server response: {response_data}")
-            
+
             response_json = json.loads(response_data)
             prompt_id = response_json.get('prompt_id')
-            
+
             if prompt_id:
                 print(f"Prompt ID: {prompt_id}")
 
                 while True:
-                    status_req = request.Request(f"http://127.0.0.1:8188/history/{prompt_id}")
+                    status_req = request.Request(f"https://21d1-122-187-108-202.ngrok-free.app/history/{prompt_id}")
                     with request.urlopen(status_req) as status_response:
                         status_data = json.loads(status_response.read().decode('utf-8'))
                         print(status_data)
@@ -244,26 +245,25 @@ def queue_prompt(prompt, steps=1):
                             break
 
                     time.sleep(1)  # Wait for 1 second before checking again
-                
-                
+
                 # Find the generated image
-                output_dir = r"C:\Users\nikhi\Downloads\bhAIya-main\bhAIya-remastered\backend\static\imageGen"
+                output_dir = "/Users/rachitdas/Desktop/newBhaiya/Bhaiya/bhAIya-remastered/backend/static/imageGen"
                 image_files = [f for f in os.listdir(output_dir) if f.startswith("ComfyUI_")]
                 if image_files:
                     latest_image = max(image_files, key=lambda x: os.path.getctime(os.path.join(output_dir, x)))
                     image_path = os.path.join(output_dir, latest_image)
-                    
+
                     # Convert image to base64
                     with Image.open(image_path) as img:
                         buffered = io.BytesIO()
                         img.save(buffered, format="PNG")
                         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                    
+
                     # Delete the image file
-                    os.remove(image_path)
+                    # os.remove(image_path)
 
                     compressed_base64, format_used = compress_image(img_base64)
-                    
+
                     # Return the result
                     return {prompt: compressed_base64}
                 else:
@@ -272,8 +272,7 @@ def queue_prompt(prompt, steps=1):
             else:
                 print("No prompt ID received. The job may not have been queued properly.")
                 return None
-    
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-

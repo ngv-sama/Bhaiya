@@ -258,6 +258,7 @@ form.addEventListener('submit', function(e) {
                 let responseHTML = 'Hey! Found something you might like. Take a look:';
                 if (Array.isArray(data) && data.length > 0) {
                     responseHTML += '<div class="product-grid">';
+                    console.log(data)
                     data.forEach(item => {
                         console.log(item);
                         let base64Image = item.image;
@@ -295,7 +296,7 @@ form.addEventListener('submit', function(e) {
             });
         } else {
             // Toggle is on, use the new behavior
-            fetch('/generate_custom_image', {
+            fetch('https://f84d-122-187-108-202.ngrok-free.app/custom_image_gen', {
                 method: 'POST',
                 body: formData
             })

@@ -24,22 +24,24 @@ from utils import (
 from similarity import find_top_k_similar,get_personal_recommendations
 from comfyui_util import queue_prompt
 from pymongo import MongoClient
+from flask_cors import CORS
 
 load_dotenv()
+
 
 mongoDatabase = MongoClient(os.getenv("CONNECTION_STRING"))["bhAIya"]
 
 # DATABASE_NAME="database"
 # DATABASE_NAME="database_500"
 # DATABASE_NAME="amazon_database"
-# DATABASE_NAME = "only_clothes"
-DATABASE_NAME = os.getenv("DATABASE_NAME")
+DATABASE_NAME = "only_clothes"
+# DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 # IMAGES_DATABASE= "imageDatabase"
 # IMAGES_DATABASE= "imageDatabase_500"
 # IMAGES_DATABASE = "amazon_images"
-# IMAGES_DATABASE = "only_clothes_images"
-IMAGES_DATABASE = os.getenv("IMAGES_DATABASE")
+IMAGES_DATABASE = "only_clothes_images"
+# IMAGES_DATABASE = os.getenv("IMAGES_DATABASE")
 
 
 users_collection = mongoDatabase[os.getenv("USERS_COLLECTION")]
@@ -66,6 +68,7 @@ except Exception as e:
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Set a secret key for session management
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 BACKEND_URL = os.getenv("BACKEND_URL_SERVER")
 OLLAMA_URL = os.getenv("OLLAMA_URL_SERVER")
@@ -465,7 +468,6 @@ def get_details():
         return jsonify({"error": f"Error communicating with backend: {str(e)}"}), 500
 
 
-
 @app.route('/get_recommendations', methods=['POST'])
 def get_recommendations():
     if not session.get("logged_in"):
@@ -859,7 +861,7 @@ def generate_custom_image():
     if not session.get("logged_in"):
         return jsonify({"error": "Not logged in"}), 401
     query = request.form.get("description")
-    return queue_prompt(query, steps=10)
+    return queue_prompt(query, steps=1)
 
 if __name__ == "__main__":
     # app.run(debug=True,port=5002)
